@@ -27,17 +27,7 @@ jobs:
       # Build and start the services with Docker Compose
       - name: Build and start services
         run: docker-compose -f docker-compose.yaml up -d
-
-      # Wait for MySQL to be ready before running the tests
-      - name: Wait for MySQL
-        run: |
-          timeout 60s bash -c '
-          until docker-compose -f docker-compose.yaml exec -T mysql mysqladmin ping -h localhost -u root -pmysql --silent; do
-            echo "Waiting for MySQL to be ready..."
-            sleep 2
-          done
-          '
-
+        
       # Run tests using unittest in the login_service container
       - name: Run tests
         run: |
