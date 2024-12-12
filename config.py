@@ -17,6 +17,6 @@ class TestConfig(Config):
     JWT_SECRET_KEY = os.getenv('TEST_JWT_SECRET_KEY')
     TESTING = True
     JWT_REQUIRED = False
-    SQLALCHEMY_DATABASE_URI = f"mysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
+    SQLALCHEMY_DATABASE_URI = f"mysql://{os.getenv('DB_USER', 'root')}:{os.getenv('DB_PASSWORD', 'P*ssW0rd')}@{os.getenv('DB_HOST', 'mysql')}/{os.getenv('DB_NAME', 'festival_db')}"
     SECRET_KEY = os.getenv('TEST_FESTIVAL_SERVICE_SECRET_KEY')
     

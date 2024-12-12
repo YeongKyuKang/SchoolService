@@ -5,15 +5,16 @@ from models import Festival, User, Reservation
 from datetime import datetime, timedelta
 import json
 from config import TestConfig
+import os
 
 class TestFestivalService(unittest.TestCase):
 
     def setUp(self):
-        app.config.from_object(TestConfig)
         app.config['TESTING'] = True
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-        self.client = app.test_client()
+        app.config.from_object(TestConfig)
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{os.getenv('DB_USER', 'root')}:{os.getenv('DB_PASSWORD', 'P*ssW0rd')}@{os.getenv('DB_HOST', 'mysql')}/{os.getenv('DB_NAME', 'festival_db')}"
         self.app_context = app.app_context()
+        self.client = app.test_client()
         self.app_context.push()
         db.create_all()
 
