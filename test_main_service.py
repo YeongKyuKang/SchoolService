@@ -22,7 +22,7 @@ class TestMainService(unittest.TestCase):
     def test_festival_redirect(self):
         response = self.app.get('/festival')
         self.assertEqual(response.status_code, 302)
-        self.assertIn('festival-service.local:5002/', response.location)
+        self.assertIn('festival-service.local/', response.location)
 
     def test_news_redirect(self):
         response = self.app.get('/news')
