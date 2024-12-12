@@ -13,7 +13,9 @@ services:
       - mysql
     ports:
       - "5004:5004"
-  
+    networks:
+      - app-network
+        
   mysql:
     image: kyk000306/test-mysql:latest
     environment:
@@ -22,6 +24,16 @@ services:
       - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - app-network
 
 volumes:
   mysql-data:
+
+networks:
+  app-network:
+    driver: bridge
