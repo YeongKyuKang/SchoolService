@@ -1,25 +1,31 @@
-version: '3.8'
+version: "3.8"
 
 services:
   login_service:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "5006:5006"
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=user_db
     depends_on:
       - mysql
-    env_file:
-      - ./.env
-
+    ports:
+      - "5006:5006"
+  
   mysql:
-    image: kyk000306/test-mysql:latest
+    image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: P*ssW0rd
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: user_db
     ports:
       - "3307:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
-  mysql_data:
+  mysql-data:

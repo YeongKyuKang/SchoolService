@@ -6,7 +6,6 @@ from config import Config
 from models import db, User
 from datetime import timedelta
 
-
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -20,31 +19,25 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-   if request.method == 'POST':
-       
+   if request.method == 'POST':       
         try:
             student_id = request.form.get('student_id')
             password = request.form.get('password')
             
-           
             if not student_id or not password:
                return jsonify({"error": "Student ID and password are required"}), 400
             
             user = User.query.filter_by(student_id=student_id).first()
             
             if user and check_password_hash(user.password_hash, password):
-               access_token = create_access_token(identity=str(user.user_id))
-               
+               access_token = create_access_token(identity=str(user.user_id))   
                redirect_url = 'http://localhost:5003'  # 메인 서비스의 URL로 직접 리다이렉션
-               
                response = make_response(jsonify({
                     'success': True,
                     'message': '로그인 성공',
                     'redirect_url': redirect_url
                 }))
                set_access_cookies(response, access_token)
-                
-               
                return response, 200
             else:
                return jsonify({
@@ -53,7 +46,6 @@ def login():
                 }), 401
         except Exception as e:
            return jsonify({"error": "로그인 처리 중 오류가 발생했습니다."}), 500
-    
    return render_template('login.html')
 
 @app.route('/')
@@ -96,7 +88,6 @@ def register():
         except Exception as e:
             db.session.rollback()
         return jsonify({"success": False, "message": "회원가입 중 오류가 발생했습니다."}), 500
-
     return render_template('register.html')
 
 @app.errorhandler(400)
