@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ notice_service ]
+    branches: [ NoticeService ]
   pull_request:
-    branches: [ notice_service ]
+    branches: [ NoticeService ]
 
 jobs:
   build_and_test:
