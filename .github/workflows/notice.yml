@@ -28,20 +28,6 @@ jobs:
       - name: Build and start services
         run: docker-compose -f docker-compose.yaml up -d
 
-      # Wait for MySQL to be ready
-      - name: Wait for MySQL
-        run: |
-          max_retries=30
-          counter=0
-          until docker-compose -f docker-compose.yaml exec -T mysql mysqladmin ping -h localhost -u root --password=mysql --silent; do
-            sleep 5
-            counter=$((counter + 1))
-            if [ $counter -ge $max_retries ]; then
-              echo "MySQL did not become ready in time"
-              exit 1
-            fi
-          done
-        
       # Run tests using unittest in the notice_service container
       - name: Run tests
         run: |
