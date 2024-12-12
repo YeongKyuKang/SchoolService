@@ -7,12 +7,11 @@ from routes import festival as festival_blueprint
 
 app = Flask(__name__)
 app.config.from_object(Config)
-app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 app.config.from_object(TestConfig)
-
+jwt = JWTManager(app)
 
 db.init_app(app)
-jwt = JWTManager(app)
+
 
 @app.before_request
 def before_request():

@@ -1,5 +1,5 @@
 from flask import jsonify, request, render_template, redirect, url_for, make_response
-from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, unset_jwt_cookies
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity, create_access_token, unset_jwt_cookies
 from . import festival
 from models import Reservation, Festival, User, db
 from datetime import datetime
@@ -14,7 +14,9 @@ def jwt_req_custom(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         if not app.config['TESTING']:
-            return jwt_required()(fn)(*args, **kwargs)
+            verify_jwt_in_request()
+            return (fn)(*args, **kwargs)
+        verify_jwt_in_request(optional=True)
         return fn(*args, **kwargs)
     return wrapper
 
@@ -182,6 +184,7 @@ def get_festivals():
     return jsonify({"success": True, "festivals": festivals_data})
 
 @festival.route('/login')
+@jwt_req_custom
 def login():
     return redirect("http://localhost:5006/login")
 
@@ -194,14 +197,17 @@ def logout():
 
 
 @festival.route('/redirect_to_main')
+@jwt_req_custom
 def redirect_to_main():
     return redirect("http://localhost:5003/")
 
 @festival.route('/redirect_to_news')
+@jwt_req_custom
 def redirect_to_news():
     return redirect("http://localhost:5004/")
 
 @festival.route('/redirect_to_course')
+@jwt_req_custom
 def redirect_to_course():
     return redirect("http://localhost:5001/")
 
