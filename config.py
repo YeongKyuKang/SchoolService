@@ -13,3 +13,9 @@ class Config:
     JWT_COOKIE_SECURE = False  # Set to True in production
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
+class TestConfig(Config):
+    TESTING = True
+    JWT_REQUIRED = False
+    SQLALCHEMY_DATABASE_URI = f"mysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
+    SECRET_KEY = os.getenv('TEST_FESTIVAL_SERVICE_SECRET_KEY')
+    JWT_SECRET_KEY = os.getenv('TEST_JWT_SECRET_KEY')

@@ -1,18 +1,24 @@
 from flask import Flask, request, jsonify, render_template, url_for
 from flask_jwt_extended import JWTManager, verify_jwt_in_request
 from config import Config
+from config import TestConfig
 from models import db
 from routes import festival as festival_blueprint
 
 app = Flask(__name__)
 app.config.from_object(Config)
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False
+app.config.from_object(TestConfig)
+
 
 db.init_app(app)
 jwt = JWTManager(app)
 
 @app.before_request
 def before_request():
+    if app.config['TESTING']or not app.config.get('JWT_REQUIRED', True):
+        return  # 테스트 환경이거나 JWT가 필요하지 않으면 JWT 검증 건너뛰기
+
     if request.endpoint and request.endpoint != 'static':
         try:
             verify_jwt_in_request()

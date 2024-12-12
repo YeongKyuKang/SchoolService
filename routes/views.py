@@ -2,13 +2,24 @@ from flask import jsonify, request, render_template, redirect, url_for, make_res
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, unset_jwt_cookies
 from . import festival
 from models import Reservation, Festival, User, db
-from sqlalchemy import func
 from datetime import datetime
+from functools import wraps
+from config import TestConfig
+from flask import Flask
 
+app = Flask(__name__)
+app.config.from_object(TestConfig)
 
+def jwt_req_custom(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if not app.config['TESTING']:
+            return jwt_required()(fn)(*args, **kwargs)
+        return fn(*args, **kwargs)
+    return wrapper
 
 @festival.route('/')
-@jwt_required()
+@jwt_req_custom
 def home():
     page = request.args.get('page', 1, type=int)
     per_page = 10
@@ -51,7 +62,7 @@ def home():
                            user_reserved_festivals=user_reserved_festivals)
 
 @festival.route('/apply/<festival_key>')
-@jwt_required()
+@jwt_req_custom
 def apply(festival_key):
     user_id = get_jwt_identity()
     festival = Festival.query.filter_by(festival_key=festival_key).first_or_404()
@@ -70,7 +81,7 @@ def apply(festival_key):
                            image=image)
 
 @festival.route('/api/apply', methods=['POST'])
-@jwt_required()
+@jwt_req_custom
 def api_apply():
     user_id = get_jwt_identity()
     data = request.json
@@ -124,7 +135,7 @@ def api_apply():
         return jsonify({"success": False, "message": "예약 중 오류가 발생했습니다."}), 500
 
 @festival.route('/api/cancel_reservation/<int:reservation_id>', methods=['POST'])
-@jwt_required()
+@jwt_req_custom
 def cancel_reservation(reservation_id):
     try:
         user_id = get_jwt_identity()
@@ -154,7 +165,7 @@ def cancel_reservation(reservation_id):
     return jsonify({"success": False, "message": str(e)}), 500
 
 @festival.route('/api/festivals')
-@jwt_required()
+@jwt_req_custom
 def get_festivals():
     user_id = get_jwt_identity()
     
@@ -175,7 +186,7 @@ def login():
     return redirect("http://localhost:5006/login")
 
 @festival.route('/logout')
-@jwt_required()
+@jwt_req_custom
 def logout():
    response = make_response(redirect('http://localhost:5006/login'))
    unset_jwt_cookies(response)
