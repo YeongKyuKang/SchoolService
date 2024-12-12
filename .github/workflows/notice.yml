@@ -27,11 +27,26 @@ jobs:
       # Build and start the services with Docker Compose
       - name: Build and start services
         run: docker-compose -f docker-compose.yaml up -d
+
+      # Wait for MySQL to be ready
+      - name: Wait for MySQL
+        run: |
+          max_retries=30
+          counter=0
+          until docker-compose -f docker-compose.yaml exec -T mysql mysqladmin ping -h localhost -u root --password=mysql --silent; do
+            sleep 5
+            counter=$((counter + 1))
+            if [ $counter -ge $max_retries ]; then
+              echo "MySQL did not become ready in time"
+              exit 1
+            fi
+          done
         
-      # Run tests using unittest in the login_service container
+      # Run tests using unittest in the notice_service container
       - name: Run tests
         run: |
-          docker-compose -f docker-compose.yaml exec -T notice_service python -m unittest test_notice_service.py
+          docker-compose -f docker-compose.yaml exec -T -e FLASK_TESTING=True notice_service python -m unittest test_notice_service.py
+        timeout-minutes: 2
 
       # Stop and remove the containers used for testing
       - name: Stop services
@@ -45,7 +60,7 @@ jobs:
       # Checkout repository
       - uses: actions/checkout@v2
 
-      # Log in to GitHub Container Registry (GHCR.
+      # Log in to GitHub Container Registry (GHCR)
       - name: Log in to GitHub Container Registry (GHCR)
         uses: docker/login-action@v2
         with:
@@ -58,7 +73,7 @@ jobs:
         run: |
           docker build -t ghcr.io/yeongkyukang/notice_service:latest .
 
-      # Push the Docker image to GHCR.
+      # Push the Docker image to GHCR
       - name: Push Docker image to GHCR
         run: |
           docker push ghcr.io/yeongkyukang/notice_service:latest
