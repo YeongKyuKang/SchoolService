@@ -73,28 +73,28 @@ def api_festivals():
 @main.route('/festival')
 @jwt_required_custom
 def festival():
-    return redirect('http://localhost:5002/')
+    return redirect('festival-service.local/')
 
 @main.route('/news')
 @jwt_required_custom
 def news():
-    return redirect('http://localhost:5004/news')
+    return redirect('notice-service.local/news')
 
 @main.route('/course_registration')
 @jwt_required_custom
 def course_registration():
-    return redirect('http://localhost:5001/course_registration')
+    return redirect('course-service.local/course_registration')
 
 @main.route('/logout')
 @jwt_required_custom
 def logout():
     if current_app.config.get('TESTING', False):
-        return redirect('http://localhost:5006/login')
+        return redirect('login-service.local/login')
 
-    response = make_response(redirect('http://localhost:5006/login'))
+    response = make_response(redirect('login-service.local/login'))
     unset_jwt_cookies(response)
     return response
 
 @main.route('/login')
 def login():
-    return redirect('http://localhost:5006/login')
+    return redirect('login-service.local/login')

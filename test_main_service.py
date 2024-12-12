@@ -17,22 +17,22 @@ class TestMainService(unittest.TestCase):
     def test_course_registration_redirect(self):
         response = self.app.get('/course_registration')
         self.assertEqual(response.status_code, 302)
-        self.assertIn('http://localhost:5001/course_registration', response.location)
+        self.assertIn('course-service.local/course_registration', response.location)
 
     def test_festival_redirect(self):
         response = self.app.get('/festival')
         self.assertEqual(response.status_code, 302)
-        self.assertIn('http://localhost:5002/', response.location)
+        self.assertIn('festival-service.local:5002/', response.location)
 
     def test_news_redirect(self):
         response = self.app.get('/news')
         self.assertEqual(response.status_code, 302)
-        self.assertIn('http://localhost:5004/news', response.location)
+        self.assertIn('notice-service.local/news', response.location)
 
     def test_logout_redirect(self):
         response = self.app.get('/logout')
         self.assertEqual(response.status_code, 302)
-        self.assertIn('http://localhost:5006/login', response.location)
+        self.assertIn('login-service.local/login', response.location)
 
     def test_api_festivals(self):
         response = self.app.get('/api/festivals')
