@@ -2,7 +2,7 @@ name: CI-NoticeService
 
 on:
   push:
-    branches: [ NoticeService ]
+    branches: [NoticeService]
   pull_request:
     branches: [ NoticeService ]
 
@@ -24,20 +24,28 @@ jobs:
           sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
 
-      - name: reset
-        run: docker-compose -f docker-compose.yaml down -v
       # Build and start the services with Docker Compose
       - name: Build and start services
         run: docker-compose -f docker-compose.yaml up -d
 
-      # Run tests using unittest in the notice_service container
+      # Wait for MySQL to be ready before running the tests
+      - name: Wait for MySQL
+        run: |
+          timeout 60s bash -c '
+          until docker-compose -f docker-compose.yaml exec -T mysql mysqladmin ping -h localhost -u root -pmysql --silent; do
+            echo "Waiting for MySQL to be ready..."
+            sleep 2
+          done
+          '
+
+      # Run tests using unittest in the login_service container
       - name: Run tests
         run: |
           docker-compose -f docker-compose.yaml exec -T notice_service python -m unittest test_notice_service.py
 
       # Stop and remove the containers used for testing
       - name: Stop services
-        run: docker-compose -f docker-compose.yaml down -v
+        run: docker-compose -f docker-compose.yaml down
 
   push_to_ghcr:
     runs-on: ubuntu-latest
@@ -60,7 +68,7 @@ jobs:
         run: |
           docker build -t ghcr.io/yeongkyukang/notice_service:latest .
 
-      # Push the Docker image to GHCR
+      # Push the Docker image to GHCR.
       - name: Push Docker image to GHCR
         run: |
           docker push ghcr.io/yeongkyukang/notice_service:latest
