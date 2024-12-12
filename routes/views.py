@@ -29,26 +29,26 @@ def news_item(notice_id):
 
 @notice.route('/redirect_to_main')
 def redirect_to_main():
-    return redirect('http://localhost:5003/')
+    return redirect('main-service.local')
 
 @notice.route('/redirect_to_festival')
 def redirect_to_festival():
-    return redirect('http://localhost:5002/')
+    return redirect('festival-service.local')
 
 @notice.route('/redirect_to_course')
 def redirect_to_course():
-    return redirect('http://localhost:5001/course_registration')
+    return redirect('course-service.local/course_registration')
 
 @notice.route('/logout')
 @jwt_optional
 def logout():
-    response = make_response(redirect('http://localhost:5006/login'))
+    response = make_response(redirect('login-service.local/login'))
     unset_jwt_cookies(response)
     return response
 
 @notice.route('/login')
 def login():
-    return redirect('http://localhost:5006/login')
+    return redirect('login-service.local/login')
 
 @notice.route('/api/notices')
 def get_notices():
