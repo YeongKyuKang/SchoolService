@@ -26,12 +26,11 @@ jobs:
 
       # Build and start the services with Docker Compose
       - name: Build and start services
-        run: docker-compose -f docker-compose.yaml up -d
+        run: docker-compose -f docker-compose.yaml up --build -d
 
       # Run tests using unittest in the login_service container
       - name: Run tests
-        run: |
-          docker-compose -f docker-compose.yaml exec -T notice_service python -m unittest test_notice_service.py
+        run: docker-compose -f docker-compose.yaml exec -T notice_service python -m unittest test_notice_service.py
 
       # Stop and remove the containers used for testing
       - name: Stop services
