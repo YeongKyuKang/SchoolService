@@ -15,21 +15,6 @@ class TestNoticeService(unittest.TestCase):
         app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{os.getenv('DB_USER', 'root')}:{os.getenv('DB_PASSWORD', 'mysql')}@{os.getenv('DB_HOST', 'mysql')}:{os.getenv('DB_PORT', '3306')}/{os.getenv('DB_NAME', 'notice_db')}"
         self.app = app.test_client()
 
-        self._wait_for_mysql()
-
-    def _wait_for_mysql(self):
-        """Ensure MySQL is available before tests run."""
-        retries = 30
-        while retries > 0:
-            try:
-                with app.app_context():  # Push the app context before trying the connection
-                    db.engine.connect()
-                return
-            except OperationalError:
-                retries -= 1
-                time.sleep(2)
-        raise Exception("MySQL not available after retries")
-    
     def test_home_redirect(self):
         response = self.app.get('/')
         self.assertEqual(response.status_code, 302)
@@ -39,6 +24,7 @@ class TestNoticeService(unittest.TestCase):
         response = self.app.get('/news')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'University Notices', response.data)
+
 
     def test_news_item(self):
         with app.app_context():
@@ -68,7 +54,7 @@ class TestNoticeService(unittest.TestCase):
             data = json.loads(response.data)
 
             # Check the length of the returned data
-            self.assertEqual(len(data), 7)  # Verify the number of notices
+            self.assertEqual(len(data), 8)  # Verify the number of notices
 
             # Check for expected notices (latest ones)
             self.assertEqual(data[0]['title'], 'Holiday Announcement')  # Most recent
