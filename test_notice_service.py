@@ -12,7 +12,7 @@ class TestNoticeService(unittest.TestCase):
     def setUp(self):
         app.config['TESTING'] = True
         os.environ['FLASK_TESTING'] = 'True'
-        app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{os.getenv('DB_USER', 'root')}:{os.getenv('DB_PASSWORD', 'mysql')}@{os.getenv('DB_HOST', 'mysql')}:{os.getenv('DB_PORT', '3306')}/{os.getenv('DB_NAME', 'notice_db')}"
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{os.getenv('DB_USER', 'root')}:{os.getenv('DB_PASSWORD', 'P*ssW0rd')}@{os.getenv('DB_HOST', 'mysql')}:{os.getenv('DB_PORT', '3306')}/{os.getenv('DB_NAME', 'notice_db')}"
         self.app = app.test_client()
 
     def test_home_redirect(self):
