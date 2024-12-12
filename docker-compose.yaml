@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - DB_USER=root
-      - DB_PASSWORD=mysql
+      - DB_PASSWORD=P*ssW0rd
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_NAME=notice_db
@@ -15,15 +15,13 @@ services:
       - "5004:5004"
   
   mysql:
-    image: mysql:8.0
+    image: kyk000306/test-mysql:latest
     environment:
-      MYSQL_ROOT_PASSWORD: mysql
-      MYSQL_DATABASE: notice_db
+      MYSQL_ROOT_PASSWORD: P*ssW0rd
     ports:
       - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
   mysql-data:

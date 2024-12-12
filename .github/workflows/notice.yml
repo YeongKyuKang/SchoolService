@@ -24,6 +24,8 @@ jobs:
           sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
 
+      - name: reset
+        run: docker-compose -f docker-compose down -v
       # Build and start the services with Docker Compose
       - name: Build and start services
         run: docker-compose -f docker-compose.yaml up -d
@@ -31,12 +33,11 @@ jobs:
       # Run tests using unittest in the notice_service container
       - name: Run tests
         run: |
-          docker-compose -f docker-compose.yaml exec -T -e FLASK_TESTING=True notice_service python -m unittest test_notice_service.py
-        timeout-minutes: 2
+          docker-compose -f docker-compose.yaml exec -T notice_service python -m unittest test_notice_service.py
 
       # Stop and remove the containers used for testing
       - name: Stop services
-        run: docker-compose -f docker-compose.yaml down
+        run: docker-compose -f docker-compose.yaml down -v
 
   push_to_ghcr:
     runs-on: ubuntu-latest
