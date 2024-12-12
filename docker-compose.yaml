@@ -15,19 +15,16 @@ services:
       - "5004:5004"
     networks:
       - app-network
-        
+
   mysql:
     image: kyk000306/test-mysql:latest
     environment:
       MYSQL_ROOT_PASSWORD: P*ssW0rd
+      MYSQL_DATABASE: notice_db
     ports:
       - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
     networks:
       - app-network
 

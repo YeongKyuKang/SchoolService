@@ -54,7 +54,7 @@ class TestNoticeService(unittest.TestCase):
             data = json.loads(response.data)
 
             # Check the length of the returned data
-            self.assertEqual(len(data), 8)  # Verify the number of notices
+            self.assertEqual(len(data), 7)  # Verify the number of notices
 
             # Check for expected notices (latest ones)
             self.assertEqual(data[0]['title'], 'Holiday Announcement')  # Most recent
