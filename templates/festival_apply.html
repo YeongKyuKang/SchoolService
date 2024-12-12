@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}축제 신청 - {{ festival.title }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>축제 신청</h1>
+    <p>원하시는 축제의 좌석을 선택하여 신청해주세요. 즐거운 축제 되세요!</p>
+</section>
+
+<section class="festival-application">
+    <h2 class="section-title">Festival Application</h2>
+    <div class="application-container">
+        <div class="festival-info">
+            <img src="{{ url_for('static', filename='images/' + image) }}" alt="{{ festival.title }}">
+            <h3 id="festivalTitle">{{ festival.title }}</h3>
+            <p id="festivalDescription">{{ festival.description }}</p>
+            <p>Date: <span id="festivalDate">{{ festival.date.strftime('%Y-%m-%d %H:%M') }}</span></p>
+            <p>좌석현황: <span id="festivalCapacity">{{ festival.capacity }}/{{ festival.total_seats }}</span></p>
+        </div>
+        <div class="seat-selection">
+            <h3>좌석 선택</h3>
+            <p id="seatInfo" class="seat-info"></p>
+            <div class="seat-selection-content">
+                <div class="seat-grid-container">
+                    <div class="seat-grid" id="seatGrid"></div>
+                </div>
+                <div class="button-container">
+                    <button id="applyButton" disabled>신청하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="return-button-container">
+    <a href="{{ url_for('festival.home') }}" class="return-button">축제 페이지로 돌아가기</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.festivalData = {
+    festivalKey: '{{ festival.festival_key }}',
+    festivalTotalSeats: JSON.parse('{{ festival.total_seats }}'),
+    reservedSeats: JSON.parse('{{ reserved_seats|tojson|safe }}'),
+    isReserved: JSON.parse('{{ is_reserved|tojson|safe }}')
+};
+console.log('Festival Data:', window.festivalData);
+</script>
+<script src="{{ url_for('static', filename='js/apply.js') }}"></script>
+{% endblock %}
+

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}축제 메인 페이지{% endblock %}
+
+{% block hero %}
+<section class="hero">
+  <h1>우리의 축제에 오신 것을 환영합니다</h1>
+  <p>놀라운 이벤트를 발견하고 잊을 수 없는 추억을 만드세요</p>
+</section>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  {% if request.args.get('error') %}
+  <div class="error-message">
+    {{ request.args.get('error') }}
+  </div>
+  {% endif %}
+
+  <section class="festival-list">
+    <h2 class="section-title">축제 목록</h2>
+    <div id="festival-loading-indicator" class="loading-indicator" style="display: none;">
+      <div class="spinner"></div>
+      <p>로딩 중...</p>
+    </div>
+    <div class="festival-grid" id="festival-list">
+      <!-- 축제 목록은 JavaScript에서 동적으로 생성됩니다 -->
+    </div>
+    <div class="pagination" id="festival-pagination">
+      <!-- 페이지네이션은 JavaScript에서 동적으로 생성됩니다 -->
+    </div>
+  </section>
+
+  <section class="festival-cancel-list">
+    <h2 class="section-title">축제 취소</h2>
+    <div id="cancel-loading-indicator" class="loading-indicator" style="display: none;">
+      <div class="spinner"></div>
+      <p>로딩 중...</p>
+    </div>
+    <div class="festival-grid" id="cancel-festival-list">
+      <!-- 취소 가능한 축제 목록은 JavaScript에서 동적으로 생성됩니다 -->
+    </div>
+    <div class="pagination" id="cancel-pagination">
+      <!-- 취소 목록 페이지네이션은 JavaScript에서 동적으로 생성됩니다 -->
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const festivalsData = JSON.parse('{{ festivals|tojson|safe }}');
+  const reservedFestivalKeys = JSON.parse('{{ reserved_festival_keys|tojson|safe }}');
+  const userReservedFestivals = JSON.parse('{{ user_reserved_festivals|tojson|safe }}');
+</script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}
+
