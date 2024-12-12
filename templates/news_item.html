@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}{{ notice.title }}{% endblock %}
+
+{% block hero %}
+<section class="hero">
+  <h1>University Notices</h1>
+  <p>Stay updated with the latest announcements from our university</p>
+</section>
+{% endblock %}
+
+{% block content %}
+<section class="notice-detail">
+  <h2 class="section-title">공지 사항</h2>
+  <div class="notice-content-wrapper">
+    <div class="notice-header">
+      <h3 class="notice-title">{{ notice.title }}</h3>
+      <p class="notice-date">{{ notice.date.strftime('%Y-%m-%d') }}</p>
+    </div>
+    <div class="notice-content">{{ notice.content }}</div>
+  </div>
+  <div class="back-button-container">
+    <a href="{{ url_for('notice.news') }}" class="back-button">공지사항 목록으로 돌아가기</a>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+
+{% endblock %}
+
