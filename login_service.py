@@ -31,7 +31,7 @@ def login():
             
             if user and check_password_hash(user.password_hash, password):
                access_token = create_access_token(identity=str(user.user_id))   
-               redirect_url = 'http://localhost:5003'  # 메인 서비스의 URL로 직접 리다이렉션
+               redirect_url = 'http://main-service.main-service.svc.cluster.local:5003'  # 메인 서비스의 URL로 직접 리다이렉션
                response = make_response(jsonify({
                     'success': True,
                     'message': '로그인 성공',
