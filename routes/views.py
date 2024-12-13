@@ -1,28 +1,43 @@
-from flask import render_template, redirect, url_for, request, jsonify, make_response
-from flask_jwt_extended import jwt_required, unset_jwt_cookies, get_jwt_identity
+from flask import render_template, redirect, url_for, request, jsonify, make_response, current_app
+from flask_jwt_extended import jwt_required, unset_jwt_cookies, get_jwt_identity, verify_jwt_in_request
 from werkzeug.exceptions import Unauthorized, UnprocessableEntity
 from . import course
-
- 
+from functools import wraps
 from models import db, Course, Registration, Student
 from sqlalchemy.exc import SQLAlchemyError
+from config import TestConfig
+from flask import Flask
 
+app = Flask(__name__)
+app.config.from_object(TestConfig)
 
+TEST_USER_ID = 99
 
+def jwt_req_custom(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if not app.config['TESTING']:
+            verify_jwt_in_request()
+        else:
+            verify_jwt_in_request(optional=True)
+        return fn(*args, **kwargs)
+    return wrapper
 
-
+def get_current_user_id():
+    if app.config['TESTING']:
+        return TEST_USER_ID
+    return get_jwt_identity()
 
 @course.route('/api/get_courses', methods=['GET'])
-@jwt_required()
+@jwt_req_custom
 def get_courses():
    
     try:
         # Return empty list for courses
         courses_data = []
 
-
         # 현재 사용자의 ID 가져오기
-        current_user_id = get_jwt_identity()
+        current_user_id = get_current_user_id()
         
         # 현재 사용자의 신청한 과목 정보 가져오기
         student = Student.query.filter_by(id=current_user_id).first()
@@ -54,12 +69,12 @@ def get_courses():
         return jsonify({"success": False, "message": "An error occurred while fetching courses"}), 500
 
 @course.route('/course_registration')
-@jwt_required()
+@jwt_req_custom
 def course_service():
     return render_template('course_service.html')
 
 @course.route('/api/dropdown_options', methods=['GET'])
-@jwt_required()
+@jwt_req_custom
 def get_dropdown_options():
    
     try:
@@ -76,13 +91,13 @@ def get_dropdown_options():
         return jsonify({"success": False, "message": "An error occurred while fetching dropdown options"}), 500
 
 @course.route('/api/credits')
-@jwt_required()
+@jwt_req_custom
 def get_credits():
     
     return redirect(url_for('course.get_dropdown_options'))
 
 @course.route('/api/departments')
-@jwt_required()
+@jwt_req_custom
 def get_departments():
    
     return redirect(url_for('course.get_dropdown_options'))
@@ -90,7 +105,7 @@ def get_departments():
 
 
 @course.route('/api/search_courses')
-@jwt_required()
+@jwt_req_custom
 def search_courses():
     
     try:
@@ -127,11 +142,11 @@ def search_courses():
         return jsonify({"success": False, "message": "An error occurred while searching courses"}), 500
 
 @course.route('/api/apply_course', methods=['POST'])
-@jwt_required()
+@jwt_req_custom
 def apply_course():
     data = request.get_json()
     course_key = data.get('course_key')
-    user_id = get_jwt_identity()  # This gets the user.id from JWT
+    user_id = get_current_user_id()  # This gets the user.id from JWT
 
   
 
@@ -186,11 +201,11 @@ def apply_course():
         return jsonify({"success": False, "message": str(e)}), 500
 
 @course.route('/api/cancel_course', methods=['POST'])
-@jwt_required()
+@jwt_req_custom
 def cancel_course():
     data = request.get_json()
     course_key = data.get('course_key')
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
 
     try:
         # Get the student record using id (which is equivalent to user_id)
@@ -224,11 +239,11 @@ def cancel_course():
         return jsonify({"success": False, "message": str(e)}), 500
 
 @course.route('/api/get_applied_courses', methods=['GET'])
-@jwt_required()
+@jwt_req_custom
 def get_applied_courses():
    
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         
         student = Student.query.filter_by(id=user_id).first()
         if not student:
@@ -271,7 +286,7 @@ def redirect_to_news():
     return redirect('http://localhost:5004/news')
 
 @course.route('/logout')
-@jwt_required()
+@jwt_req_custom
 def logout():
   
     response = make_response(redirect('http://localhost:5006/login'))

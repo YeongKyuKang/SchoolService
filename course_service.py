@@ -1,16 +1,14 @@
 from flask import Flask, request, redirect, url_for, jsonify, render_template, send_from_directory, abort
-
 from flask_jwt_extended import JWTManager, verify_jwt_in_request, get_jwt_identity, jwt_required
 from flask_sqlalchemy import SQLAlchemy
-from config import Config
+from config import Config, TestConfig
 from models import db
 from routes import course as course_blueprint
-
 import os
 import logging
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config.from_object(TestConfig)
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
@@ -20,26 +18,28 @@ logger = logging.getLogger(__name__)
 db.init_app(app)
 jwt = JWTManager(app)
 
-
 # Register blueprints
 app.register_blueprint(course_blueprint)
 
 # JWT configuration
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_COOKIE_SECURE'] = False  # Set to True in production
-app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # CSRF protection disabled
 app.config['JWT_COOKIE_SAMESITE'] = 'Lax'  # Set to 'Strict' in production
 app.config['JWT_ERROR_MESSAGE_KEY'] = 'error'
 
 
 @app.before_request
 def before_request():
+    if app.config['TESTING'] or not app.config.get('JWT_REQUIRED', True):
+        return  # 테스트 환경이거나 JWT가 필요하지 않으면 JWT 검증 건너뛰기
+
     if request.endpoint and request.endpoint != 'static':
         try:
             verify_jwt_in_request()
-            
         except Exception as e:
-           abort(401)
+            if request.is_json:
+                return jsonify({"error": "로그인이 필요한 서비스입니다.", "redirect": url_for('course.login', _external=True)}), 401
+            return render_template('auth_required.html')
 
 @app.route('/')
 def index():
@@ -85,8 +85,5 @@ def favicon():
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 if __name__ == '__main__':
-   
-    
-    
     app.run(host='0.0.0.0', port=5001, debug=True)
 

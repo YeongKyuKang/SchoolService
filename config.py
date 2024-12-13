@@ -13,3 +13,9 @@ class Config:
     JWT_COOKIE_SECURE = False  # Set to True in production
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
+class TestConfig(Config):
+    JWT_SECRET_KEY = os.getenv('TEST_JWT_SECRET_KEY')
+    TESTING = True
+    JWT_REQUIRED = False
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SECRET_KEY = os.getenv('TEST_COURSE_SERVICE_SECRET_KEY')
