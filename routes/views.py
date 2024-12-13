@@ -8,29 +8,37 @@ from config import TestConfig
 from flask import Flask
 
 app = Flask(__name__)
+
 app.config.from_object(TestConfig)
+
+
+TEST_USER_ID = 99
 
 def jwt_req_custom(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         if not app.config['TESTING']:
             verify_jwt_in_request()
-            return (fn)(*args, **kwargs)
-        verify_jwt_in_request(optional=True)
+        else:
+            verify_jwt_in_request(optional=True)
         return fn(*args, **kwargs)
     return wrapper
 
+def get_current_user_id():
+    if app.config['TESTING']:
+        return TEST_USER_ID
+    return get_jwt_identity()
+#JWT_REQUIRED와 verify_jwt_in_request를 사용해야한다던 오류는 패키지 버전을 전부 업그레이드해서
+#최신화 하는 것으로 해결
 @festival.route('/')
 @jwt_req_custom
 def home():
     page = request.args.get('page', 1, type=int)
     per_page = 10
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
 
     festivals = Festival.query.order_by(Festival.date).paginate(page=page, per_page=per_page, error_out=False)
-    
     reserved_festival_keys = [r.festival_key for r in Reservation.query.filter_by(user_id=user_id, status='Reserved').all()]
-    
     user_reserved_festivals = db.session.query(
         Festival,
         Reservation.id.label('reservation_id'),
@@ -66,14 +74,13 @@ def home():
 @festival.route('/apply/<festival_key>')
 @jwt_req_custom
 def apply(festival_key):
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     festival = Festival.query.filter_by(festival_key=festival_key).first_or_404()
-    
     # 현재 사용자의 예약 상태 확인
     reservation = Reservation.query.filter_by(festival_key=festival_key, user_id=user_id).first()
     is_reserved = reservation is not None and reservation.status == 'Reserved'
-
     reserved_seats = [r.seat_number for r in Reservation.query.filter_by(festival_key=festival_key, status='Reserved').all()]
+    
     image = request.args.get('image', 'default.jpg')
 
     return render_template('festival_apply.html', 
@@ -85,12 +92,10 @@ def apply(festival_key):
 @festival.route('/api/apply', methods=['POST'])
 @jwt_req_custom
 def api_apply():
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     data = request.json
-
     festival_key = data.get('festival_key')
     seat_number = data.get('seat_number')
-
     if not festival_key or not seat_number:
         return jsonify({"success": False, "message": "축제 키와 좌석 번호가 필요합니다."}), 400
 
@@ -126,7 +131,6 @@ def api_apply():
         status='Reserved',
         reservation_time=datetime.utcnow()
     )
-
     try:
         db.session.add(new_reservation)
         festival.capacity += 1
@@ -140,8 +144,7 @@ def api_apply():
 @jwt_req_custom
 def cancel_reservation(reservation_id):
     try:
-        user_id = get_jwt_identity()
-       
+        user_id = get_current_user_id()
         reservation = Reservation.query.filter_by(id=reservation_id, user_id=user_id).first()
         
         if not reservation:
@@ -153,13 +156,11 @@ def cancel_reservation(reservation_id):
         festival = Festival.query.filter_by(festival_key=reservation.festival_key).first()
         if not festival:
            return jsonify({"success": False, "message": "Associated festival not found"}), 404
-
         reservation.status = 'Cancelled'
         if festival.capacity > 0:
             festival.capacity -= 1
         
         db.session.commit()
-        
         return jsonify({"success": True, "message": "Reservation cancelled successfully"}), 200
     
     except Exception as e:
@@ -169,7 +170,7 @@ def cancel_reservation(reservation_id):
 @festival.route('/api/festivals')
 @jwt_req_custom
 def get_festivals():
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     
     festivals = Festival.query.order_by(Festival.date).all()
     reserved_festival_keys = [r.festival_key for r in Reservation.query.filter_by(user_id=user_id, status='Reserved').all()]

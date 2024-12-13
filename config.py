@@ -17,6 +17,8 @@ class TestConfig(Config):
     JWT_SECRET_KEY = os.getenv('TEST_JWT_SECRET_KEY')
     TESTING = True
     JWT_REQUIRED = False
-    SQLALCHEMY_DATABASE_URI = f"mysql://{os.getenv('DB_USER', 'root')}:{os.getenv('DB_PASSWORD', 'P*ssW0rd')}@{os.getenv('DB_HOST', 'mysql')}/{os.getenv('DB_NAME', 'festival_db')}"
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    #sqlalchemy.exc.OperationalError: (MySQLdb.OperationalError) (2005, "Unknown server host 'mysql' (11001)")
+    #에러를 기존의 SQLALCHEMY_DATABASE_URI 형식을 SQLITE로 변경, TEST_FESTIVAL_SERVICE에선 정확한 값을 명시해서 해결.
     SECRET_KEY = os.getenv('TEST_FESTIVAL_SERVICE_SECRET_KEY')
     

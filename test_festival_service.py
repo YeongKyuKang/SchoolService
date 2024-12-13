@@ -7,10 +7,13 @@ import json
 from config import TestConfig
 import os
 
+# TEST_USER_ID를 views.py와 동일하게 설정
+TEST_USER_ID = 99
+
 class TestFestivalService(unittest.TestCase):
 
     def setUp(self):
-        app.config['TESTING'] = True
+        app.config['TESTING'] =  True
         app.config.from_object(TestConfig)
         app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{os.getenv('DB_USER', 'root')}:{os.getenv('DB_PASSWORD', 'P*ssW0rd')}@{os.getenv('DB_HOST', 'mysql')}/{os.getenv('DB_NAME', 'festival_db')}"
         self.app_context = app.app_context()
@@ -19,7 +22,7 @@ class TestFestivalService(unittest.TestCase):
         db.create_all()
 
         # 테스트용 데이터 생성
-        test_user = User(name="Test User", email="test@example.com", phone_number="1234567890")
+        test_user = User(user_id=TEST_USER_ID, name="Test User", email="test@example.com", phone_number="1234567890")
         db.session.add(test_user)
         
         test_festival = Festival(
