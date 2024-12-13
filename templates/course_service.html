@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Course Service{% endblock %}
+
+{% block hero %}
+<section class="hero">
+  <div class="hero-content">
+    <h1>Welcome to Course Service</h1>
+    <p>Manage your courses and registrations with ease</p>
+  </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Course List</h1>
+  
+  <table id="searchTable" class="search-table">
+    <tr>
+      <td>키워드</td>
+      <td>
+        <select id="creditsDropdown" class="keyword-dropdown">
+          <option value="">Select Credits</option>
+          <!-- Options will be dynamically populated by JavaScript -->
+        </select>
+        <select id="departmentDropdown" class="keyword-dropdown">
+          <option value="">Select Department</option>
+          <!-- Options will be dynamically populated by JavaScript -->
+        </select>
+        <button id="keywordSearchBtn" class="search-button">Search</button>
+        <button id="allCoursesBtn" class="all-courses-button">전체 강좌 검색</button>
+      </td>
+    </tr>
+    <tr>
+      <td>Course Name</td>
+      <td>
+        <input type="text" id="courseNameInput" class="course-name-input" placeholder="Enter course name">
+        <button id="courseNameSearchBtn" class="search-button">Search</button>
+      </td>
+    </tr>
+  </table>
+
+  <table id="courseTable" class="course-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Course Name</th>
+        <th>Professor</th>
+        <th>Max Students</th>
+        <th>Current Students</th>
+        <th>Credits</th>
+        <th>Department</th>
+        <th>Year</th>
+        <th>Keep</th>
+        <th>Apply</th>
+      </tr>
+    </thead>
+    <tbody id="courseTableBody">
+      <!-- Course data will be inserted here by JavaScript -->
+    </tbody>
+  </table>
+
+  <div id="paginationContainer" class="pagination"></div>
+
+  <h1>Applied Courses</h1>
+
+  <div class="course-chart">
+  <table id="appliedCoursesTable" class="course-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Course Name</th>
+        <th>Professor</th>
+        <th>Credits</th>
+        <th>Department</th>
+        <th>Year</th>
+        <th>Status</th>
+        <th>Cancel</th>
+      </tr>
+    </thead>
+    <tbody id="appliedCoursesTableBody">
+      <!-- Applied course data will be inserted here by JavaScript -->
+    </tbody>
+  </table>
+</div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="{{ url_for('static', filename='js/course_service.js') }}"></script>
+{% endblock %}
+
