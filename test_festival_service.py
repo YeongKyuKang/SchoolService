@@ -13,7 +13,7 @@ TEST_USER_ID = 99
 class TestFestivalService(unittest.TestCase):
 
     def setUp(self):
-        app.config['TESTING'] =  True
+        app.config['TESTING'] = True
         app.config.from_object(TestConfig)
         app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{os.getenv('DB_USER', 'root')}:{os.getenv('DB_PASSWORD', 'P*ssW0rd')}@{os.getenv('DB_HOST', 'mysql')}/{os.getenv('DB_NAME', 'festival_db')}"
         self.app_context = app.app_context()

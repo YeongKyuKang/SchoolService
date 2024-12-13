@@ -21,4 +21,3 @@ class TestConfig(Config):
     #sqlalchemy.exc.OperationalError: (MySQLdb.OperationalError) (2005, "Unknown server host 'mysql' (11001)")
     #에러를 기존의 SQLALCHEMY_DATABASE_URI 형식을 SQLITE로 변경, TEST_FESTIVAL_SERVICE에선 정확한 값을 명시해서 해결.
     SECRET_KEY = os.getenv('TEST_FESTIVAL_SERVICE_SECRET_KEY')
-    

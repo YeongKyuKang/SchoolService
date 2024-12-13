@@ -4,12 +4,14 @@ from config import Config
 from config import TestConfig
 from models import db
 from routes import festival as festival_blueprint
+import os
 
 app = Flask(__name__)
-app.config.from_object(Config)
+
+
+
 app.config.from_object(TestConfig)
 jwt = JWTManager(app)
-
 db.init_app(app)
 
 

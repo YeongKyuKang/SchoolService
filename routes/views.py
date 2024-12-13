@@ -8,9 +8,7 @@ from config import TestConfig
 from flask import Flask
 
 app = Flask(__name__)
-
 app.config.from_object(TestConfig)
-
 
 TEST_USER_ID = 99
 
