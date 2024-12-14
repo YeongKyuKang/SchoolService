@@ -1,4 +1,4 @@
-name: CI-LoginService
+name: CI-FestivalService
 
 on:
   push:
