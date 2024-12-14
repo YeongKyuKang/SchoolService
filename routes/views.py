@@ -185,12 +185,12 @@ def get_festivals():
 @festival.route('/login')
 @jwt_req_custom
 def login():
-    return redirect("http://localhost:5006/login")
+    return redirect("login-service.local/login")
 
 @festival.route('/logout')
 @jwt_req_custom
 def logout():
-   response = make_response(redirect('http://localhost:5006/login'))
+   response = make_response(redirect('login-service.local/login'))
    unset_jwt_cookies(response)
    return response
 
@@ -198,15 +198,15 @@ def logout():
 @festival.route('/redirect_to_main')
 @jwt_req_custom
 def redirect_to_main():
-    return redirect("http://localhost:5003/")
+    return redirect("main-service.local")
 
 @festival.route('/redirect_to_news')
 @jwt_req_custom
 def redirect_to_news():
-    return redirect("http://localhost:5004/")
+    return redirect("notice-service.local/news")
 
 @festival.route('/redirect_to_course')
 @jwt_req_custom
 def redirect_to_course():
-    return redirect("http://localhost:5001/")
+    return redirect("course-service.local/course_registration")
 
