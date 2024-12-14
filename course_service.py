@@ -5,14 +5,16 @@ from config import Config, TestConfig
 from models import db
 from routes import course as course_blueprint
 import os
-import logging
 
 app = Flask(__name__)
-app.config.from_object(TestConfig)
+env = os.environ.get('FLASK_ENV')
 
-# Set up logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
-logger = logging.getLogger(__name__)
+if env == 'testing':
+    app.config.from_object(TestConfig)
+    app.config['TESTING'] = True
+else:
+    app.config.from_object(Config)
+    app.config['TESTING'] = os.environ.get('FLASK_TESTING', 'False') == 'True'
 
 # Initialize extensions
 db.init_app(app)
