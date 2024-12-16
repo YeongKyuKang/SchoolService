@@ -17,3 +17,14 @@ spec:
         image: ghcr.io/yeongkyukang/login_service:latest # 기본값 설정
       imagePullSecrets:
       - name: ghcr-secret
+        env:
+          - name: DB_USER
+            value: "root"
+          - name: DB_PASSWORD
+            value: "mysql"
+          - name: DB_HOST
+            value: "mysql"
+          - name: DB_PORT
+            value: "3306"
+          - name: DB_NAME
+            value: "course_db"
