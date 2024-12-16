@@ -105,7 +105,7 @@ def get_departments():
 
 
 @course.route('/api/search_courses')
-@jwt_req_custom
+
 def search_courses():
     
     try:
@@ -147,8 +147,6 @@ def apply_course():
     data = request.get_json()
     course_key = data.get('course_key')
     user_id = get_current_user_id()  # This gets the user.id from JWT
-
-  
 
     try:
         # Get the student record using id (which is equivalent to user_id)

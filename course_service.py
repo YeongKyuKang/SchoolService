@@ -5,6 +5,10 @@ from config import Config, TestConfig
 from models import db
 from routes import course as course_blueprint
 import os
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 env = os.environ.get('FLASK_ENV')
@@ -32,16 +36,34 @@ app.config['JWT_ERROR_MESSAGE_KEY'] = 'error'
 
 @app.before_request
 def before_request():
-    if app.config['TESTING'] or not app.config.get('JWT_REQUIRED', True):
-        return  # 테스트 환경이거나 JWT가 필요하지 않으면 JWT 검증 건너뛰기
-
+    logger.info(f"Received request: {request.method} {request.path}")
+    
+    if app.config['TESTING']:
+        logger.debug("Testing environment detected, skipping JWT verification")
+        return
+    
+    if not app.config.get('JWT_REQUIRED', True):
+        logger.debug("JWT verification is not required, skipping")
+        return
+    
     if request.endpoint and request.endpoint != 'static':
+        logger.debug(f"Processing request for endpoint: {request.endpoint}")
         try:
             verify_jwt_in_request()
+            logger.info("JWT verification successful")
         except Exception as e:
+            logger.error(f"JWT verification failed: {str(e)}")
             if request.is_json:
-                return jsonify({"error": "로그인이 필요한 서비스입니다.", "redirect": url_for('course.login', _external=True)}), 401
+                logger.info("Returning JSON response for authentication failure")
+                return jsonify({
+                    "error": "로그인이 필요한 서비스입니다.", 
+                    "redirect": url_for('course.login', _external=True)
+                }), 401
+            logger.info("Rendering auth_required template")
             return render_template('auth_required.html')
+    else:
+        logger.debug("Skipping JWT verification for static endpoint")
+
 
 @app.route('/')
 def index():
