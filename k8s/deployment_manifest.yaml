@@ -19,12 +19,12 @@ spec:
       - name: ghcr-secret
         env:
           - name: DB_USER
-            value: "root"
+            value: root
           - name: DB_PASSWORD
-            value: "mysql"
+            value: mysql
           - name: DB_HOST
-            value: "mysql"
+            value: mysql-service.default
           - name: DB_PORT
             value: "3306"
           - name: DB_NAME
-            value: "user_db"
+            value: user_db
