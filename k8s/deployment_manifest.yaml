@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-service-container
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: main-service
+  template:
+    metadata:
+      labels:
+        app: main-service
+    spec:
+      containers:
+      - name: main-service-container
+        image: ghcr.io/yeongkyukang/main_service:latest # 기본값 설정
+      imagePullSecrets:
+      - name: ghcr-secret

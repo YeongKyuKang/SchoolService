@@ -32,7 +32,7 @@ class TestMainService(unittest.TestCase):
     def test_logout_redirect(self):
         response = self.app.get('/logout')
         self.assertEqual(response.status_code, 302)
-        self.assertIn('login-service.local/login', response.location)
+        self.assertIn('main-service.local/main', response.location)
 
     def test_api_festivals(self):
         response = self.app.get('/api/festivals')

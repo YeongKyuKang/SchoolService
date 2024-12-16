@@ -14,7 +14,7 @@ def jwt_required_custom(fn):
             verify_jwt_in_request()
             return fn(*args, **kwargs)
         except Exception:
-            return jsonify({"error": "로그인이 필요한 서비스입니다.", "redirect": url_for('main.login', _external=True)}), 401
+            return jsonify({"error": "로그인이 필요한 서비스입니다.", "redirect": url_for('main.main', _external=True)}), 401
     return wrapper
 
 @main.route('/')
@@ -89,12 +89,12 @@ def course_registration():
 @jwt_required_custom
 def logout():
     if current_app.config.get('TESTING', False):
-        return redirect('login-service.local/login')
+        return redirect('main-service.local/main')
 
-    response = make_response(redirect('login-service.local/login'))
+    response = make_response(redirect('main-service.local/main'))
     unset_jwt_cookies(response)
     return response
 
-@main.route('/login')
-def login():
-    return redirect('login-service.local/login')
+@main.route('/main')
+def main():
+    return redirect('main-service.local/main')

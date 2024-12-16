@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-service-svc
+  labels:
+    app: main-service
+  namespace: main-service
+spec:
+  selector:
+    app: main-service
+  ports:
+    - protocol: TCP
+      port: 80         
+      targetPort: 5003
+      nodePort: 30001
+  type: NodePort
