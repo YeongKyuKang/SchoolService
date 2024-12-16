@@ -13,7 +13,7 @@ spec:
         app: login-service
     spec:
       containers:
-        - name: randfoodtravel-container
+        - name: login-service-container
           image: ghcr.io/yeongkyukang/login_service:latest # 기본값 설정
       imagePullSecrets:
         - name: ghcr-secret
