@@ -27,4 +27,4 @@ spec:
           - name: DB_PORT
             value: "3306"
           - name: DB_NAME
-            value: "course_db"
+            value: "user_db"
