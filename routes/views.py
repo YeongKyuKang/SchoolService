@@ -105,7 +105,7 @@ def get_departments():
 
 
 @course.route('/api/search_courses')
-
+@jwt_req_custom
 def search_courses():
     
     try:

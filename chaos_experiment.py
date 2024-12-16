@@ -21,7 +21,6 @@ used_emails = set()
 used_phone_numbers = set()
 
 def generate_student_data():
-    
     attempts = 0
     while True:
         attempts += 1
@@ -49,13 +48,11 @@ def generate_student_data():
             return student_data
         
         if attempts >= 1000:
-            
             raise RuntimeError("Unable to generate unique student data")
-        
+
 def generate_jwt_token(user_id):
     logger.info(f"Attempting to generate JWT token for user_id: {user_id}")
     try:
-        # JWT 라이브러리를 직접 사용하여 토큰 생성
         payload = {
             'user_id': str(user_id),
             'exp': datetime.utcnow() + timedelta(hours=1)
@@ -71,10 +68,17 @@ def generate_jwt_token(user_id):
         logger.exception("Detailed traceback:")
         raise
 
+def set_access_token_cookie(session, token):
+    """
+    세션에 access_token_cookie를 설정합니다.
+    """
+    session.cookies.set('access_token_cookie', token, domain='localhost', path='/')
+    logger.info("access_token_cookie가 세션에 설정되었습니다.")
+
 def get_student_with_token():
     try:
         student = random.choice(students)
-        token = generate_jwt_token(student['id']) #generate_jwt_token function is assumed to exist.
+        token = generate_jwt_token(student['id'])
         return student, token
     except IndexError:
         raise
@@ -88,14 +92,16 @@ def check_system_health():
         student = generate_student_data()
         token = generate_jwt_token(student['id'])
 
-        headers = {'Authorization': f'Bearer {token}'}
-        response = requests.get(f"{BASE_URL}/api/search_courses", headers=headers)
+        session = requests.Session()
+        set_access_token_cookie(session, token)
+
+        response = session.get(f"{BASE_URL}/api/search_courses")
         
         if response.status_code == 200:
-            # 응답이 성공적이면 토큰이 유효하다고 간주
+            logger.info("System health check successful")
             return True
         else:
-            # 응답이 실패하면 토큰이 유효하지 않거나 다른 문제가 있다고 간주
+            logger.error(f"System health check failed with status code: {response.status_code}")
             return False
     except Exception as e:
         logger.error(f"Unexpected error during system health check: {str(e)}")
@@ -141,7 +147,6 @@ def fetch_dropdown_options(session):
         return None, None
         
 def search_courses(session, credits=None, department=None, course_name=None):
-    
     params = {}
     if credits:
         params['credits'] = credits
@@ -184,10 +189,11 @@ def cancel_course(session, course_key):
 def simulate_course_registration():
     logger.info("Starting course registration simulation")
     try:
-        student, token = get_student_with_token()
-        logger.debug(f"Got student with ID: {student['id']} and token: {token[:20]}...")
-        
+        student = generate_student_data()
+        token = generate_jwt_token(student['id'])
+
         session = requests.Session()
+        set_access_token_cookie(session, token)
 
         logger.info("Fetching dropdown options")
         credits, departments = fetch_dropdown_options(session)
@@ -325,6 +331,7 @@ def run_chaos_experiment():
     # Test 2: Network Delay
     session = requests.Session()
     token = generate_jwt_token(get_student_with_token()[0]['id'])
+    set_access_token_cookie(session, token)
 
     if inject_network_delay(session):
         if not wait_for_recovery():
@@ -344,3 +351,4 @@ def run_chaos_experiment():
 
 if __name__ == "__main__":
     run_chaos_experiment()
+
