@@ -10,7 +10,6 @@ spec:
       storage: 5Gi
 
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,16 +37,17 @@ spec:
           volumeMounts:
             - name: mysql-data
               mountPath: /var/lib/mysql
-            - name: init-script
+            - name: init-sql
               mountPath: /docker-entrypoint-initdb.d/init.sql
               subPath: init.sql
       volumes:
         - name: mysql-data
           persistentVolumeClaim:
             claimName: mysql-pvc
-        - name: init-script
-          configMap:
-            name: mysql-init-script
+        - name: init-sql
+          hostPath:
+            path: ./k8s/init.sql # init.sql이 있는 경로
+
 
 ---
 
