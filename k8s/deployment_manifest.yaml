@@ -4,7 +4,7 @@ metadata:
   name: login-service-container
   namespace: login-service
 spec:
-  replicas: 5
+  replicas: 3
   selector:
     matchLabels:
       app: login-service
