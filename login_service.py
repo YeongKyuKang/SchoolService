@@ -33,7 +33,7 @@ def login():
                 access_token = create_access_token(identity=str(user.user_id))
 
                 # 리디렉션 URL 처리 (클라이언트에서 전달된 리디렉션 URL을 사용)
-                redirect_url = "localhost:30001"
+                redirect_url = "http://localhost:30001/"
 
                 # JWT 토큰을 쿠키에 저장
                 response = make_response(jsonify({
