@@ -198,15 +198,15 @@ def logout():
 @festival.route('/redirect_to_main')
 @jwt_req_custom
 def redirect_to_main():
-    return redirect("http://kangyk.com/")
+    return redirect("http://kangyk.com/main")
 
 @festival.route('/redirect_to_news')
 @jwt_req_custom
 def redirect_to_news():
-    return redirect("http://kangyk.com/news")
+    return redirect("http://kangyk.com/notice")
 
 @festival.route('/redirect_to_course')
 @jwt_req_custom
 def redirect_to_course():
-    return redirect("http://kangyk.com/ourse_registration")
+    return redirect("http://kangyk.com/course_registration")
 
