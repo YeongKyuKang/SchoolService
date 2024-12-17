@@ -5,11 +5,11 @@ from . import course
 from functools import wraps
 from models import db, Course, Registration, Student
 from sqlalchemy.exc import SQLAlchemyError
-from config import TestConfig
+from config import Config
 from flask import Flask
 
 app = Flask(__name__)
-app.config.from_object(TestConfig)
+app.config.from_object(Config)
 
 TEST_USER_ID = 99
 
@@ -74,7 +74,7 @@ def course_service():
     return render_template('course_service.html')
 
 @course.route('/api/dropdown_options', methods=['GET'])
-@jwt_req_custom
+@jwt_required(optional=True)
 def get_dropdown_options():
    
     try:
@@ -91,13 +91,11 @@ def get_dropdown_options():
         return jsonify({"success": False, "message": "An error occurred while fetching dropdown options"}), 500
 
 @course.route('/api/credits')
-@jwt_req_custom
 def get_credits():
     
     return redirect(url_for('course.get_dropdown_options'))
 
 @course.route('/api/departments')
-@jwt_req_custom
 def get_departments():
    
     return redirect(url_for('course.get_dropdown_options'))
@@ -105,7 +103,6 @@ def get_departments():
 
 
 @course.route('/api/search_courses')
-@jwt_req_custom
 def search_courses():
     
     try:

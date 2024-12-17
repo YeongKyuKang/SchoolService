@@ -1,19 +1,28 @@
 import requests
 import time
 import random
-import jwt
 import logging
 from requests.exceptions import RequestException
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
+from flask import Flask, jsonify, make_response
+from flask_jwt_extended import JWTManager, create_access_token, set_access_cookies, verify_jwt_in_request
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Flask 앱 및 JWTManager 설정
+
+app = Flask(__name__)
+app.config['JWT_SECRET_KEY'] = 'jwt_secret_key'  # 실제 운영 환경에서는 안전하게 관리해야 합니다
+app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+app.config['JWT_COOKIE_SECURE'] = False  # 개발 환경에서는 False, 운영 환경에서는 True로 설정
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+jwt = JWTManager(app)
+
 BASE_URL = "http://localhost:5001"  # 환경에 맞게 조정
-SECRET_KEY = "jwt_secret_key"  # 실제 운영 환경에서는 안전하게 관리해야 합니다
 
 used_ids = set()
 used_student_ids = set()
@@ -53,49 +62,44 @@ def generate_student_data():
 def generate_jwt_token(user_id):
     logger.info(f"Attempting to generate JWT token for user_id: {user_id}")
     try:
-        payload = {
-            'user_id': str(user_id),
-            'exp': datetime.utcnow() + timedelta(hours=1)
-        }
-        access_token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-        
+        with app.app_context():
+            access_token = create_access_token(identity=str(user_id))
         logger.info(f"JWT token successfully generated for user_id: {user_id}")
         logger.debug(f"Token preview: {access_token[:20]}...")
-        
         return access_token
     except Exception as e:
         logger.error(f"JWT token generation failed: {str(e)}")
         logger.exception("Detailed traceback:")
         raise
 
-def set_access_token_cookie(session, token):
+def set_access_token_cookie(response, token):
     """
-    세션에 access_token_cookie를 설정합니다.
+    응답 객체에 access_token_cookie를 설정합니다.
     """
-    session.cookies.set('access_token_cookie', token, domain='localhost', path='/')
-    logger.info("access_token_cookie가 세션에 설정되었습니다.")
+    with app.app_context():
+        set_access_cookies(response, token)
+    logger.info("access_token_cookie가 응답 객체에 설정되었습니다.")
 
 def get_student_with_token():
     try:
         student = random.choice(students)
         token = generate_jwt_token(student['id'])
-        return student, token
-    except IndexError:
-        raise
+        response = make_response(jsonify({'message': 'Token generated'}))
+        set_access_token_cookie(response, token)
+        return student, response
     except Exception as e:
+        logger.error(f"Error in get_student_with_token: {str(e)}")
         raise
 
 students = [generate_student_data() for _ in range(10)]
 
 def check_system_health():
     try:
-        student = generate_student_data()
-        token = generate_jwt_token(student['id'])
+        student, response = get_student_with_token()
+        cookies = response.headers.get('Set-Cookie')
 
-        session = requests.Session()
-        set_access_token_cookie(session, token)
-
-        response = session.get(f"{BASE_URL}/api/search_courses")
+        headers = {'Cookie': cookies} if cookies else {}
+        response = requests.get(f"{BASE_URL}/api/search_courses", headers=headers)
         
         if response.status_code == 200:
             logger.info("System health check successful")
@@ -107,14 +111,14 @@ def check_system_health():
         logger.error(f"Unexpected error during system health check: {str(e)}")
         return False
 
-def fetch_dropdown_options(session):
+def fetch_dropdown_options(headers):
     logger.info("Starting to fetch dropdown options")
     try:
         url = f"{BASE_URL}/api/dropdown_options"
         logger.debug(f"Sending GET request to {url}")
-        logger.debug(f"Request headers: {session.headers}")
+        logger.debug(f"Request headers: {headers}")
         
-        response = session.get(url, timeout=10)
+        response = requests.get(url, headers=headers, timeout=10)
         logger.debug(f"Received response with status code: {response.status_code}")
         logger.debug(f"Response headers: {response.headers}")
     
@@ -146,7 +150,7 @@ def fetch_dropdown_options(session):
         logger.error(f"Unexpected error occurred while fetching dropdown options: {str(e)}")
         return None, None
         
-def search_courses(session, credits=None, department=None, course_name=None):
+def search_courses(headers, credits=None, department=None, course_name=None):
     params = {}
     if credits:
         params['credits'] = credits
@@ -155,7 +159,7 @@ def search_courses(session, credits=None, department=None, course_name=None):
     if course_name:
         params['course_name'] = course_name
     
-    response = session.get(f"{BASE_URL}/api/search_courses", params=params)
+    response = requests.get(f"{BASE_URL}/api/search_courses", params=params, headers=headers)
     if response.status_code == 200:
         data = response.json()
         if data.get("success"):
@@ -164,9 +168,9 @@ def search_courses(session, credits=None, department=None, course_name=None):
     logger.error("Failed to search courses")
     return []
 
-def apply_course(session, course_key):
+def apply_course(headers, course_key):
     logger.info(f"Applying for course: {course_key}")
-    response = session.post(f"{BASE_URL}/api/apply_course", json={"course_key": course_key})
+    response = requests.post(f"{BASE_URL}/api/apply_course", json={"course_key": course_key}, headers=headers)
     if response.status_code == 200:
         data = response.json()
         if data.get("success"):
@@ -175,9 +179,9 @@ def apply_course(session, course_key):
     logger.error("Course application failed")
     return False
 
-def cancel_course(session, course_key):
+def cancel_course(headers, course_key):
     logger.info(f"Cancelling course: {course_key}")
-    response = session.post(f"{BASE_URL}/api/cancel_course", json={"course_key": course_key})
+    response = requests.post(f"{BASE_URL}/api/cancel_course", json={"course_key": course_key}, headers=headers)
     if response.status_code == 200:
         data = response.json()
         if data.get("success"):
@@ -189,46 +193,45 @@ def cancel_course(session, course_key):
 def simulate_course_registration():
     logger.info("Starting course registration simulation")
     try:
-        student = generate_student_data()
-        token = generate_jwt_token(student['id'])
+        with app.app_context():
+            student, response = get_student_with_token()
+            cookies = response.headers.get('Set-Cookie')
+            headers = {'Cookie': cookies} if cookies else {}
 
-        session = requests.Session()
-        set_access_token_cookie(session, token)
+            logger.info("Fetching dropdown options")
+            credits, departments = fetch_dropdown_options(headers)
+            if not credits or not departments:
+                logger.error("Failed to fetch dropdown options")
+                return False
+            logger.debug(f"Fetched credits: {credits}, departments: {departments}")
 
-        logger.info("Fetching dropdown options")
-        credits, departments = fetch_dropdown_options(session)
-        if not credits or not departments:
-            logger.error("Failed to fetch dropdown options")
-            return False
-        logger.debug(f"Fetched credits: {credits}, departments: {departments}")
+            selected_credits = random.choice(credits)
+            selected_department = random.choice(departments)
+            logger.info(f"Selected credits: {selected_credits}, department: {selected_department}")
 
-        selected_credits = random.choice(credits)
-        selected_department = random.choice(departments)
-        logger.info(f"Selected credits: {selected_credits}, department: {selected_department}")
+            logger.info("Searching for courses")
+            courses = search_courses(headers, credits=selected_credits, department=selected_department)
+            if not courses:
+                logger.error("No courses found for selected criteria")
+                return False
+            logger.debug(f"Found {len(courses)} courses")
 
-        logger.info("Searching for courses")
-        courses = search_courses(session, credits=selected_credits, department=selected_department)
-        if not courses:
-            logger.error("No courses found for selected criteria")
-            return False
-        logger.debug(f"Found {len(courses)} courses")
+            selected_course = random.choice(courses)
+            logger.info(f"Selected course: {selected_course['course_key']}")
 
-        selected_course = random.choice(courses)
-        logger.info(f"Selected course: {selected_course['course_key']}")
-
-        logger.info(f"Attempting to apply for course: {selected_course['course_key']}")
-        if apply_course(session, selected_course['course_key']):
-            logger.info(f"Successfully applied for course: {selected_course['course_key']}")
-            time.sleep(random.uniform(0.5, 2))  # Simulate some time passing
-            if random.random() < 0.3:  # 30% chance to cancel the course
-                logger.info(f"Attempting to cancel course: {selected_course['course_key']}")
-                cancel_result = cancel_course(session, selected_course['course_key'])
-                logger.info(f"Course cancellation result: {'Success' if cancel_result else 'Failed'}")
-                return cancel_result
-            return True
-        else:
-            logger.error(f"Failed to apply for course: {selected_course['course_key']}")
-            return False
+            logger.info(f"Attempting to apply for course: {selected_course['course_key']}")
+            if apply_course(headers, selected_course['course_key']):
+                logger.info(f"Successfully applied for course: {selected_course['course_key']}")
+                time.sleep(random.uniform(0.5, 2))  # Simulate some time passing
+                if random.random() < 0.3:  # 30% chance to cancel the course
+                    logger.info(f"Attempting to cancel course: {selected_course['course_key']}")
+                    cancel_result = cancel_course(headers, selected_course['course_key'])
+                    logger.info(f"Course cancellation result: {'Success' if cancel_result else 'Failed'}")
+                    return cancel_result
+                return True
+            else:
+                logger.error(f"Failed to apply for course: {selected_course['course_key']}")
+                return False
     except Exception as e:
         logger.exception(f"Unexpected error in simulate_course_registration: {str(e)}")
         return False
@@ -264,25 +267,25 @@ def simulate_concurrent_registrations(num_concurrent=10):
     
     return successful_registrations == num_concurrent
 
-def inject_network_delay(session):
+def inject_network_delay(headers):
     logger.info("Injecting network delay...")
-    original_get = session.get
-    original_post = session.post
+    original_get = requests.get
+    original_post = requests.post
 
     def delayed_request(method, *args, **kwargs):
         time.sleep(random.uniform(1, 3))  # Random delay between 1 and 3 seconds
         return method(*args, **kwargs)
 
-    session.get = lambda *args, **kwargs: delayed_request(original_get, *args, **kwargs)
-    session.post = lambda *args, **kwargs: delayed_request(original_post, *args, **kwargs)
+    requests.get = lambda *args, **kwargs: delayed_request(original_get, *args, **kwargs)
+    requests.post = lambda *args, **kwargs: delayed_request(original_post, *args, **kwargs)
 
     # Test the delay
     start_time = time.time()
-    fetch_dropdown_options(session)
+    fetch_dropdown_options(headers)
     end_time = time.time()
 
-    session.get = original_get
-    session.post = original_post
+    requests.get = original_get
+    requests.post = original_post
 
     if end_time - start_time > 1:
         logger.info("Network delay injection successful")
@@ -318,36 +321,37 @@ def wait_for_recovery(timeout=30, interval=5):
 def run_chaos_experiment():
     logger.info("Starting chaos engineering experiment for course_service")
     
-    if not check_system_health():
-        logger.error("System is not healthy at the start. Aborting experiment.")
-        return
-    
-    # Test 1: Concurrent Registrations
-    if not simulate_concurrent_registrations(20):
-        logger.error("System failed to handle concurrent registrations properly")
-        if not wait_for_recovery():
+    with app.app_context():
+        if not check_system_health():
+            logger.error("System is not healthy at the start. Aborting experiment.")
             return
+        
+        # Test 1: Concurrent Registrations
+        if not simulate_concurrent_registrations(20):
+            logger.error("System failed to handle concurrent registrations properly")
+            if not wait_for_recovery():
+                return
 
-    # Test 2: Network Delay
-    session = requests.Session()
-    token = generate_jwt_token(get_student_with_token()[0]['id'])
-    set_access_token_cookie(session, token)
+        # Test 2: Network Delay
+        student, response = get_student_with_token()
+        cookies = response.headers.get('Set-Cookie')
+        headers = {'Cookie': cookies} if cookies else {}
 
-    if inject_network_delay(session):
-        if not wait_for_recovery():
-            logger.error("System failed to recover from network delay")
-            return
+        if inject_network_delay(headers):
+            if not wait_for_recovery():
+                logger.error("System failed to recover from network delay")
+                return
 
-    # Test 3: High Load
-    if not simulate_high_load():
-        logger.error("System failed under high load")
-        if not wait_for_recovery():
-            return
+        # Test 3: High Load
+        if not simulate_high_load():
+            logger.error("System failed under high load")
+            if not wait_for_recovery():
+                return
 
-    if check_system_health():
-        logger.info("System remained healthy after all experiments. Chaos engineering test passed!")
-    else:
-        logger.error("System health check failed after experiments. Further investigation needed.")
+        if check_system_health():
+            logger.info("System remained healthy after all experiments. Chaos engineering test passed!")
+        else:
+            logger.error("System health check failed after experiments. Further investigation needed.")
 
 if __name__ == "__main__":
     run_chaos_experiment()

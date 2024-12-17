@@ -32,6 +32,7 @@ app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_COOKIE_SECURE'] = False  # Set to True in production
 app.config['JWT_COOKIE_SAMESITE'] = 'Lax'  # Set to 'Strict' in production
 app.config['JWT_ERROR_MESSAGE_KEY'] = 'error'
+app.config['JWT_EXEMPT_ROUTES'] = ['/api/dropdown_options']
 
 
 @app.before_request
@@ -46,7 +47,7 @@ def before_request():
         logger.debug("JWT verification is not required, skipping")
         return
     
-    if request.endpoint and request.endpoint != 'static':
+    if request.endpoint and request.endpoint != 'course.get_dropdown_options':
         logger.debug(f"Processing request for endpoint: {request.endpoint}")
         try:
             verify_jwt_in_request()
