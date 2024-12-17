@@ -185,12 +185,12 @@ def get_festivals():
 @festival.route('/login')
 @jwt_req_custom
 def login():
-    return redirect("login-service.local/login")
+    return redirect("http://kangyk.com/login")
 
 @festival.route('/logout')
 @jwt_req_custom
 def logout():
-   response = make_response(redirect('login-service.local/login'))
+   response = make_response(redirect('http://kangyk.com/login'))
    unset_jwt_cookies(response)
    return response
 
@@ -198,15 +198,15 @@ def logout():
 @festival.route('/redirect_to_main')
 @jwt_req_custom
 def redirect_to_main():
-    return redirect("main-service.local")
+    return redirect("http://kangyk.com/")
 
 @festival.route('/redirect_to_news')
 @jwt_req_custom
 def redirect_to_news():
-    return redirect("notice-service.local/news")
+    return redirect("http://kangyk.com/news")
 
 @festival.route('/redirect_to_course')
 @jwt_req_custom
 def redirect_to_course():
-    return redirect("course-service.local/course_registration")
+    return redirect("http://kangyk.com/ourse_registration")
 
