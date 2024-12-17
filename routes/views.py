@@ -73,28 +73,28 @@ def api_festivals():
 @main.route('/festival')
 @jwt_required_custom
 def festival():
-    return redirect('festival-service.festival-service.svc.cluster.local/')
+    return redirect('http://kangyk.com/festival')
 
 @main.route('/news')
 @jwt_required_custom
 def news():
-    return redirect('notice-service.notice-service.svc.cluster.local/news')
+    return redirect('http://kangyk.com/notice')
 
 @main.route('/course_registration')
 @jwt_required_custom
 def course_registration():
-    return redirect('course-service.course-service.svc.cluster.local/course_registration')
+    return redirect('http://kangyk.com/course_registration')
 
 @main.route('/logout')
 @jwt_required_custom
 def logout():
     if current_app.config.get('TESTING', False):
-        return redirect('main-service.main-service.svc.cluster.local/main')
+        return redirect('http://kangyk.com/main')
 
-    response = make_response(redirect('main-service.main-service.svc.cluster.local/main'))
+    response = make_response(redirect('http://kangyk.com/login'))
     unset_jwt_cookies(response)
     return response
 
-@main.route('/main')
+@main.route('/login')
 def main():
-    return redirect('main-service.main-service.svc.cluster.local/main')
+    return redirect('http://kangyk.com/login')
