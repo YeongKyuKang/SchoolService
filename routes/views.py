@@ -7,6 +7,10 @@ from models import db, Course, Registration, Student
 from sqlalchemy.exc import SQLAlchemyError
 from config import Config
 from flask import Flask
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -104,22 +108,26 @@ def get_departments():
 
 @course.route('/api/search_courses')
 def search_courses():
-    
+    logger.info("Received request to /api/search_courses")   
     try:
         credits = request.args.get('credits')
         department = request.args.get('department')
         course_name = request.args.get('course_name')
-
+        logger.debug(f"Search parameters - credits: {credits}, department: {department}, course_name: {course_name}")
         query = Course.query
 
         if credits and credits != 'Select Credits':
             query = query.filter(Course.credits == int(credits))
+            logger.debug(f"Filtering by credits: {credits}")
         if department and department != 'Select Department':
             query = query.filter(Course.department == department)
+            logger.debug(f"Filtering by department: {department}")
         if course_name:
             query = query.filter(Course.course_name.ilike(f'%{course_name}%'))
+            logger.debug(f"Filtering by course name: {course_name}")
 
         courses = query.all()
+        logger.info(f"Found {len(courses)} courses matching the criteria")
         courses_list = [{
             'id': course.id,
             'course_key': course.course_key,
@@ -132,106 +140,124 @@ def search_courses():
             'year': course.year,
             'created_at': course.created_at.isoformat() if course.created_at else None
         } for course in courses]
-        
+        logger.debug("Successfully serialized course data")
         return jsonify({'success': True, 'courses': courses_list})
+    except ValueError as ve:
+        logger.error(f"ValueError in search_courses: {str(ve)}")
+        return jsonify({"success": False, "message": "Invalid input parameter"}), 400
+    except SQLAlchemyError as se:
+        logger.error(f"Database error in search_courses: {str(se)}")
+        return jsonify({"success": False, "message": "Database error occurred"}), 500
     except Exception as e:
-     
-        return jsonify({"success": False, "message": "An error occurred while searching courses"}), 500
+        logger.exception(f"Unexpected error in search_courses: {str(e)}")
+        return jsonify({"success": False, "message": "An unexpected error occurred"}), 500
 
 @course.route('/api/apply_course', methods=['POST'])
 @jwt_req_custom
 def apply_course():
+    logger.info("Received request to /api/apply_course")
     data = request.get_json()
     course_key = data.get('course_key')
     user_id = get_current_user_id()  # This gets the user.id from JWT
-
+    logger.debug(f"Applying for course: {course_key}, User ID: {user_id}")
     try:
+        with db.session.begin():
         # Get the student record using id (which is equivalent to user_id)
-        student = Student.query.filter_by(id=user_id).first()
-        if not student:
-           
-            return jsonify({"success": False, "message": "학생 정보를 찾을 수 없습니다."}), 404
+            student = Student.query.filter_by(id=user_id).first()
+            if not student:
+                logger.error(f"No student found for user ID: {user_id}")
+                return jsonify({"success": False, "message": "학생 정보를 찾을 수 없습니다."}), 404
 
-        student_id = student.student_id  # Get the actual student_id
-        
-        course = Course.query.filter_by(course_key=course_key).first()
-        if not course:
-           
-            return jsonify({"success": False, "message": "과목을 찾을 수 없습니다."}), 404
-
-        if course.current_students >= course.max_students:
+            student_id = student.student_id  # Get the actual student_id
+            logger.debug(f"Found student with student_id: {student_id}")
             
-            return jsonify({"success": False, "message": "수강 인원이 꽉 찼습니다."}), 400
+            course = Course.query.filter_by(course_key=course_key).with_for_update().first()
+            if not course:
+                logger.error(f"No course found with course_key: {course_key}")
+                return jsonify({"success": False, "message": "과목을 찾을 수 없습니다."}), 404
 
-        existing_registration = Registration.query.filter_by(
-            course_key=course_key, 
-            student_id=student_id
-        ).first()
-        
-        if existing_registration:
-            if existing_registration.status == 'Applied':
-                
-                return jsonify({"success": False, "message": "이미 신청한 과목입니다."}), 400
-            elif existing_registration.status == 'Cancelled':
-                # Update the existing registration to 'Applied'
-                existing_registration.status = 'Applied'
-                db.session.add(existing_registration)
+            if course.current_students >= course.max_students:
+                logger.warning(f"Course {course_key} is full. Current: {course.current_students}, Max: {course.max_students}")
+                return jsonify({"success": False, "message": "수강 인원이 꽉 찼습니다."}), 400
+
+            existing_registration = Registration.query.filter_by(
+                course_key=course_key, 
+                student_id=student_id
+            ).first()
+            
+            if existing_registration:
+                if existing_registration.status == 'Applied':
+                    logger.warning(f"Student {student_id} has already applied for course {course_key}")
+                    return jsonify({"success": False, "message": "이미 신청한 과목입니다."}), 400
+                elif existing_registration.status == 'Cancelled':
+                    # Update the existing registration to 'Applied'
+                    existing_registration.status = 'Applied'
+                    db.session.add(existing_registration)
+                    logger.info(f"Updated cancelled registration to 'Applied' for student {student_id}, course {course_key}")
+                else:
+                    logger.error(f"Unknown registration status for student {student_id}, course {course_key}: {existing_registration.status}")
+                    return jsonify({"success": False, "message": "알 수 없는 등록 상태입니다."}), 500
             else:
-               
-                return jsonify({"success": False, "message": "알 수 없는 등록 상태입니다."}), 500
-        else:
-            # Create a new registration
-            new_registration = Registration(course_key=course_key, student_id=student_id, status='Applied')
-            db.session.add(new_registration)
-        
-        # Increment current_students
-        course.current_students += 1
-        
-        db.session.commit()
-        
-        return jsonify({"success": True, "message": "과목 신청이 완료되었습니다."}), 200
+                # Create a new registration
+                new_registration = Registration(course_key=course_key, student_id=student_id, status='Applied')
+                db.session.add(new_registration)
+                logger.info(f"Created new registration for student {student_id}, course {course_key}")
+            # Increment current_students
+            course.current_students += 1
+            db.session.commit()
+            logger.info(f"Successfully applied student {student_id} to course {course_key}")
+            return jsonify({"success": True, "message": "과목 신청이 완료되었습니다."}), 200
+    except SQLAlchemyError as e:
+        logger.exception(f"Database error in apply_course: {str(e)}")
+        return jsonify({"success": False, "message": "과목 신청 중 데이터베이스 오류가 발생했습니다."}), 500
     except Exception as e:
-        db.session.rollback()
-      
-        return jsonify({"success": False, "message": str(e)}), 500
+        logger.exception(f"Unexpected error in apply_course: {str(e)}")
+        return jsonify({"success": False, "message": "과목 신청 중 예기치 못한 오류가 발생했습니다."}), 500
 
 @course.route('/api/cancel_course', methods=['POST'])
 @jwt_req_custom
 def cancel_course():
+    logger.info("Received request to /api/cancel_course")
     data = request.get_json()
     course_key = data.get('course_key')
     user_id = get_current_user_id()
-
+    logger.debug(f"Cancelling course: {course_key}, User ID: {user_id}")
     try:
+        with db.session.begin():
         # Get the student record using id (which is equivalent to user_id)
-        student = Student.query.filter_by(id=user_id).first()
-        if not student:
-            return jsonify({"success": False, "message": "학생 정보를 찾을 수 없습니다."}), 404
+            student = Student.query.filter_by(id=user_id).first()
+            if not student:
+                logger.error(f"No student found for user ID: {user_id}")
+                return jsonify({"success": False, "message": "학생 정보를 찾을 수 없습니다."}), 404
 
-        student_id = student.student_id  # Get the actual student_id
-
-        registration = Registration.query.filter_by(
-            course_key=course_key, 
-            student_id=student_id
-        ).first()
-        
-        if not registration:
-            return jsonify({"success": False, "message": "신청 내역을 찾을 수 없습니다."}), 404
-
-        course = Course.query.filter_by(course_key=course_key).first()
-        if not course:
-            return jsonify({"success": False, "message": "과목을 찾을 수 없습니다."}), 404
-
-        db.session.delete(registration)
-        
-        # Decrement current_students
-        course.current_students = max(0, course.current_students - 1)
-        
-        db.session.commit()
-        return jsonify({"success": True, "message": "과목 취소가 완료되었습니다."}), 200
+            student_id = student.student_id  # Get the actual student_id
+            logger.debug(f"Found student with student_id: {student_id}")
+            registration = Registration.query.filter_by(
+                course_key=course_key, 
+                student_id=student_id
+            ).with_for_update().first()
+            
+            if not registration:
+                logger.error(f"No registration found for student {student_id}, course {course_key}")
+                return jsonify({"success": False, "message": "신청 내역을 찾을 수 없습니다."}), 404
+            if registration.status == 'Cancelled':
+                return jsonify({"success": False, "message": "과목을 찾을 수 없습니다."}), 404
+            registration.status = 'Cancelled'
+            logger.info(f"Deleted registration for student {student_id}, course {course_key}")
+            # Decrement current_students
+            # Update the Course table
+            course = Course.query.filter_by(course_key=course_key).first()
+            if course:
+                course.current_students = max(0, course.current_students - 1)
+                logger.debug(f"Updated current_students for course {course_key}: {course.current_students}")
+            db.session.commit()
+            return jsonify({"success": True, "message": "과목 취소가 완료되었습니다."}), 200
+    except SQLAlchemyError as e:
+        logger.exception(f"Database error in cancel_course: {str(e)}")
+        return jsonify({"success": False, "message": "과목 취소 중 데이터베이스 오류가 발생했습니다."}), 500
     except Exception as e:
-        db.session.rollback()
-        return jsonify({"success": False, "message": str(e)}), 500
+        logger.exception(f"Unexpected error in cancel_course: {str(e)}")
+        return jsonify({"success": False, "message": "과목 취소 중 예기치 못한 오류가 발생했습니다."}), 500
 
 @course.route('/api/get_applied_courses', methods=['GET'])
 @jwt_req_custom

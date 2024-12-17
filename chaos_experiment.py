@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, make_response
 from flask_jwt_extended import JWTManager, create_access_token, set_access_cookies, verify_jwt_in_request
+from config import Config
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -16,10 +17,12 @@ logger = logging.getLogger(__name__)
 # Flask 앱 및 JWTManager 설정
 
 app = Flask(__name__)
+app.config.from_object(Config)
 app.config['JWT_SECRET_KEY'] = 'jwt_secret_key'  # 실제 운영 환경에서는 안전하게 관리해야 합니다
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_COOKIE_SECURE'] = False  # 개발 환경에서는 False, 운영 환경에서는 True로 설정
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 jwt = JWTManager(app)
 
 BASE_URL = "http://localhost:5001"  # 환경에 맞게 조정
@@ -94,11 +97,14 @@ def get_student_with_token():
 students = [generate_student_data() for _ in range(10)]
 
 def check_system_health():
+    logger.info("Starting system health check")
     try:
+        logger.debug("Generating student with token")
         student, response = get_student_with_token()
         cookies = response.headers.get('Set-Cookie')
-
+        logger.debug(f"Received cookies: {cookies}")
         headers = {'Cookie': cookies} if cookies else {}
+        logger.info(f"Sending health check request to {BASE_URL}/api/search_courses")
         response = requests.get(f"{BASE_URL}/api/search_courses", headers=headers)
         
         if response.status_code == 200:
@@ -106,9 +112,11 @@ def check_system_health():
             return True
         else:
             logger.error(f"System health check failed with status code: {response.status_code}")
+            logger.debug(f"Response content: {response.text}")
             return False
     except Exception as e:
         logger.error(f"Unexpected error during system health check: {str(e)}")
+        logger.exception("Detailed traceback:")
         return False
 
 def fetch_dropdown_options(headers):
