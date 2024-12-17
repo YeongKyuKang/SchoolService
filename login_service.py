@@ -5,6 +5,7 @@ from werkzeug.routing import BuildError
 from config import Config
 from models import db, User
 from datetime import timedelta
+from urllib.parse import urlparse
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -32,8 +33,10 @@ def login():
             if user and check_password_hash(user.password_hash, password):
                 access_token = create_access_token(identity=str(user.user_id))
 
-                # 리디렉션 URL 처리 (클라이언트에서 전달된 리디렉션 URL을 사용)
-                redirect_url = "http://localhost:30001/"
+                   # 리디렉션 URL 처리: 요청의 노드 IP를 사용하지만 포트는 30001로 설정
+                parsed_url = urlparse(request.host_url)
+                node_ip = parsed_url.hostname  # 현재 노드의 IP를 가져옴
+                redirect_url = f"http://{node_ip}:30001/"
 
                 # JWT 토큰을 쿠키에 저장
                 response = make_response(jsonify({
