@@ -9,7 +9,7 @@ spec:
         elements:
           - name: festival-service-appset
             repoURL: 'git@github.com:YeongKyuKang/SchoolService.git'
-            targetRevision: festivalService
+            targetRevision: FestivalService
             path: 'k8s'
   template:
     metadata:
