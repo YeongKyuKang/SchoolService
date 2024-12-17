@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: course-service-svc
+  labels:
+    app: course-service
+  namespace: course-service
+spec:
+  selector:
+    app: course-service
+  ports:
+    - protocol: TCP
+      port: 80         
+      targetPort: 5006
+      nodePort: 30003
+  type: NodePort

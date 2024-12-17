@@ -294,28 +294,27 @@ def get_applied_courses():
 @course.route('/redirect_to_main')
 def redirect_to_main():
    
-    return redirect('main-service.local/')
+    return redirect('kangyk.com/main')
 
 @course.route('/redirect_to_festival')
 def redirect_to_festival():
    
-    return redirect('festival-service.local/')
+    return redirect('http://kangyk.com/festival')
 
 @course.route('/redirect_to_news')
 def redirect_to_news():
    
-    return redirect('notice-service.local/news')
+    return redirect('http://kangyk.com/notice')
 
 @course.route('/logout')
 @jwt_req_custom
 def logout():
   
-    response = make_response(redirect('login-service.local/login'))
+    response = make_response(redirect('http://kangyk.com/login'))
     unset_jwt_cookies(response)
     return response
 
 @course.route('/login')
 def login():
-    
-    return redirect('login-service.local/login')
+    return redirect('http://kangyk.com/login')
 
