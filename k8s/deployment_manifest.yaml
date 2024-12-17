@@ -17,6 +17,11 @@ spec:
       - name: login-service-container
         image: ghcr.io/yeongkyukang/login_service:latest
         env:
+          - name: JWT_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: jwt-secret
+                key: JWT_SECRET_KEY
           - name: DB_USER
             value: root
           - name: DB_PASSWORD
