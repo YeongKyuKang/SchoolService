@@ -12,5 +12,4 @@ spec:
     - protocol: TCP
       port: 80         
       targetPort: 5006
-      nodePort: 30004
-  type: NodePort
+  type: ClusterIP
