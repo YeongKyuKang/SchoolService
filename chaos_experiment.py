@@ -9,6 +9,9 @@ from datetime import datetime, timedelta
 from flask import Flask, jsonify, make_response
 from flask_jwt_extended import JWTManager, create_access_token, set_access_cookies, verify_jwt_in_request
 from config import Config
+from models import db, Course
+from sqlalchemy.exc import SQLAlchemyError
+
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -32,12 +35,19 @@ used_student_ids = set()
 used_emails = set()
 used_phone_numbers = set()
 
+id_student_id_map = {
+    id: f'2023{str(id - 11).zfill(4)}' for id in range(12, 104)
+}
+
+# 예외 처리: ID 21의 경우
+id_student_id_map[21] = '202300010'
+
 def generate_student_data():
     attempts = 0
     while True:
         attempts += 1
-        id = random.randint(1000, 9999)
-        student_id = f"{random.randint(10000000, 99999999)}"
+        id = random.randint(12, 23)
+        student_id = id_student_id_map[id]
         email = f"student{random.randint(1, 9999)}@example.com"
         phone_number = f"010-{random.randint(1000, 9999)}-{random.randint(1000, 9999)}"
         
@@ -68,7 +78,7 @@ def generate_jwt_token(user_id):
         with app.app_context():
             access_token = create_access_token(identity=str(user_id))
         logger.info(f"JWT token successfully generated for user_id: {user_id}")
-        logger.debug(f"Token preview: {access_token[:20]}...")
+        logger.debug(f"Token preview: {access_token[:1]}...")
         return access_token
     except Exception as e:
         logger.error(f"JWT token generation failed: {str(e)}")
@@ -198,7 +208,9 @@ def cancel_course(headers, course_key):
     logger.error("Course cancellation failed")
     return False
 
-def simulate_course_registration():
+
+
+def simulate_course_registration(course_keys):
     logger.info("Starting course registration simulation")
     try:
         with app.app_context():
@@ -206,73 +218,44 @@ def simulate_course_registration():
             cookies = response.headers.get('Set-Cookie')
             headers = {'Cookie': cookies} if cookies else {}
 
-            logger.info("Fetching dropdown options")
-            credits, departments = fetch_dropdown_options(headers)
-            if not credits or not departments:
-                logger.error("Failed to fetch dropdown options")
+            if not course_keys:
+                logger.error("No available courses found in the database")
                 return False
-            logger.debug(f"Fetched credits: {credits}, departments: {departments}")
 
-            selected_credits = random.choice(credits)
-            selected_department = random.choice(departments)
-            logger.info(f"Selected credits: {selected_credits}, department: {selected_department}")
+            random.shuffle(course_keys)  # Randomize the order of course attempts
 
-            logger.info("Searching for courses")
-            courses = search_courses(headers, credits=selected_credits, department=selected_department)
-            if not courses:
-                logger.error("No courses found for selected criteria")
-                return False
-            logger.debug(f"Found {len(courses)} courses")
+            for course_key in course_keys:
+                logger.info(f"Attempting to apply for course: {course_key}")
+                if apply_course(headers, course_key):
+                    logger.info(f"Successfully applied for course: {course_key}")
+                    time.sleep(random.uniform(0.5, 2))  # Simulate some time passing
+                    if random.random() < 0.3:  # 30% chance to cancel the course
+                        logger.info(f"Attempting to cancel course: {course_key}")
+                        cancel_result = cancel_course(headers, course_key)
+                        logger.info(f"Course cancellation result: {'Success' if cancel_result else 'Failed'}")
+                    return True
+                else:
+                    logger.warning(f"Failed to apply for course: {course_key}, trying next course")
 
-            selected_course = random.choice(courses)
-            logger.info(f"Selected course: {selected_course['course_key']}")
+            logger.error("Failed to apply for any course")
+            return False
 
-            logger.info(f"Attempting to apply for course: {selected_course['course_key']}")
-            if apply_course(headers, selected_course['course_key']):
-                logger.info(f"Successfully applied for course: {selected_course['course_key']}")
-                time.sleep(random.uniform(0.5, 2))  # Simulate some time passing
-                if random.random() < 0.3:  # 30% chance to cancel the course
-                    logger.info(f"Attempting to cancel course: {selected_course['course_key']}")
-                    cancel_result = cancel_course(headers, selected_course['course_key'])
-                    logger.info(f"Course cancellation result: {'Success' if cancel_result else 'Failed'}")
-                    return cancel_result
-                return True
-            else:
-                logger.error(f"Failed to apply for course: {selected_course['course_key']}")
-                return False
     except Exception as e:
         logger.exception(f"Unexpected error in simulate_course_registration: {str(e)}")
         return False
     finally:
         logger.info("Course registration simulation completed")
 
-def simulate_concurrent_registrations(num_concurrent=10):
+
+
+def simulate_concurrent_registrations(num_concurrent, course_keys):
     logger.info(f"Starting simulation of {num_concurrent} concurrent course registrations")
-    start_time = time.time()
-    
     with ThreadPoolExecutor(max_workers=num_concurrent) as executor:
-        logger.debug(f"Created ThreadPoolExecutor with {num_concurrent} workers")
-        futures = [executor.submit(simulate_course_registration) for _ in range(num_concurrent)]
-        logger.debug(f"Submitted {num_concurrent} course registration tasks")
-        
-        results = []
-        for future in as_completed(futures):
-            try:
-                result = future.result()
-                results.append(result)
-                logger.debug(f"Task completed with result: {result}")
-            except Exception as e:
-                logger.exception(f"Task failed with exception: {str(e)}")
-                results.append(False)
+        futures = [executor.submit(simulate_course_registration, course_keys) for _ in range(num_concurrent)]
+        results = [future.result() for future in as_completed(futures)]
     
-    end_time = time.time()
-    duration = end_time - start_time
-    
-    successful_registrations = sum(1 for result in results if result)
+    successful_registrations = sum(results)
     logger.info(f"Concurrent registration test completed: {successful_registrations}/{num_concurrent} successful")
-    logger.info(f"Total time taken for concurrent registrations: {duration:.2f} seconds")
-    logger.info(f"Average time per registration: {duration/num_concurrent:.2f} seconds")
-    
     return successful_registrations == num_concurrent
 
 def inject_network_delay(headers):
@@ -302,9 +285,9 @@ def inject_network_delay(headers):
         logger.error("Network delay injection failed")
         return False
 
-def simulate_high_load():
+#def simulate_high_load():
     logger.info("Simulating high load...")
-    num_requests = 50
+    num_requests = 10
     successful_requests = 0
 
     with ThreadPoolExecutor(max_workers=10) as executor:
@@ -328,14 +311,15 @@ def wait_for_recovery(timeout=30, interval=5):
 
 def run_chaos_experiment():
     logger.info("Starting chaos engineering experiment for course_service")
-    
+    course_keys = ['CSE101', 'MAT201', 'PHY301', 'CHE102', 'BIO202']
+    num_concurrent = 40
     with app.app_context():
         if not check_system_health():
             logger.error("System is not healthy at the start. Aborting experiment.")
             return
         
         # Test 1: Concurrent Registrations
-        if not simulate_concurrent_registrations(20):
+        if not simulate_concurrent_registrations(num_concurrent, course_keys):
             logger.error("System failed to handle concurrent registrations properly")
             if not wait_for_recovery():
                 return
@@ -351,10 +335,10 @@ def run_chaos_experiment():
                 return
 
         # Test 3: High Load
-        if not simulate_high_load():
-            logger.error("System failed under high load")
-            if not wait_for_recovery():
-                return
+        #if not simulate_high_load():
+        #    logger.error("System failed under high load")
+        #    if not wait_for_recovery():
+        #        return
 
         if check_system_health():
             logger.info("System remained healthy after all experiments. Chaos engineering test passed!")

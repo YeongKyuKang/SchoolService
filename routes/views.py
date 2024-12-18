@@ -8,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from config import Config
 from flask import Flask
 import logging
+import time
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -15,8 +16,29 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config.from_object(Config)
 
+
+
 TEST_USER_ID = 99
 
+#재시도 함수
+def retry_on_exception(max_retries=3, backoff_factor=2):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            retries = 0
+            while retries < max_retries:
+                try:
+                    return func(*args, **kwargs)
+                except SQLAlchemyError as e:
+                    retries += 1
+                    if retries == max_retries:
+                        raise
+                    wait_time = backoff_factor ** retries
+                    logger.warning(f"Retry {retries}/{max_retries} after {wait_time} seconds due to: {str(e)}")
+                    time.sleep(wait_time)
+        return wrapper
+    return decorator
+#jwt 인증 커스텀
 def jwt_req_custom(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
@@ -153,60 +175,73 @@ def search_courses():
         return jsonify({"success": False, "message": "An unexpected error occurred"}), 500
 
 @course.route('/api/apply_course', methods=['POST'])
-@jwt_req_custom
+@jwt_required()
 def apply_course():
     logger.info("Received request to /api/apply_course")
     data = request.get_json()
     course_key = data.get('course_key')
-    user_id = get_current_user_id()  # This gets the user.id from JWT
+    user_id = get_jwt_identity()
+
     logger.debug(f"Applying for course: {course_key}, User ID: {user_id}")
+
     try:
-        with db.session.begin():
-        # Get the student record using id (which is equivalent to user_id)
-            student = Student.query.filter_by(id=user_id).first()
-            if not student:
-                logger.error(f"No student found for user ID: {user_id}")
-                return jsonify({"success": False, "message": "학생 정보를 찾을 수 없습니다."}), 404
+        student = Student.query.filter_by(id=user_id).first()
+        if not student:
+            logger.error(f"No student found for user ID: {user_id}")
+            return jsonify({"success": False, "message": "학생 정보를 찾을 수 없습니다."}), 404
 
-            student_id = student.student_id  # Get the actual student_id
-            logger.debug(f"Found student with student_id: {student_id}")
-            
-            course = Course.query.filter_by(course_key=course_key).with_for_update().first()
-            if not course:
-                logger.error(f"No course found with course_key: {course_key}")
-                return jsonify({"success": False, "message": "과목을 찾을 수 없습니다."}), 404
+        @retry_on_exception(max_retries=3, backoff_factor=2)
+        def process_application():
+            try:
+                # 세션 초기화
+                db.session.remove()
+                db.session.begin()
 
-            if course.current_students >= course.max_students:
-                logger.warning(f"Course {course_key} is full. Current: {course.current_students}, Max: {course.max_students}")
-                return jsonify({"success": False, "message": "수강 인원이 꽉 찼습니다."}), 400
+                course = Course.query.filter_by(course_key=course_key).with_for_update().first()
+                if not course:
+                    logger.error(f"No course found with course_key: {course_key}")
+                    return jsonify({"success": False, "message": "과목을 찾을 수 없습니다."}), 404
 
-            existing_registration = Registration.query.filter_by(
-                course_key=course_key, 
-                student_id=student_id
-            ).first()
-            
-            if existing_registration:
-                if existing_registration.status == 'Applied':
-                    logger.warning(f"Student {student_id} has already applied for course {course_key}")
-                    return jsonify({"success": False, "message": "이미 신청한 과목입니다."}), 400
-                elif existing_registration.status == 'Cancelled':
-                    # Update the existing registration to 'Applied'
-                    existing_registration.status = 'Applied'
-                    db.session.add(existing_registration)
-                    logger.info(f"Updated cancelled registration to 'Applied' for student {student_id}, course {course_key}")
+                if course.current_students >= course.max_students:
+                    logger.warning(f"Course {course_key} is full. Current: {course.current_students}, Max: {course.max_students}")
+                    return jsonify({"success": False, "message": "수강 인원이 꽉 찼습니다."}), 400
+
+                existing_registration = Registration.query.filter_by(
+                    course_key=course_key, 
+                    student_id=student.student_id
+                ).first()
+                
+                if existing_registration:
+                    if existing_registration.status == 'Applied':
+                        logger.warning(f"Student {student.student_id} has already applied for course {course_key}")
+                        return jsonify({"success": False, "message": "이미 신청한 과목입니다."}), 400
+                    elif existing_registration.status == 'Cancelled':
+                        existing_registration.status = 'Applied'
+                        logger.info(f"Updated cancelled registration to 'Applied' for student {student.student_id}, course {course_key}")
+                    else:
+                        logger.error(f"Unknown registration status for student {student.student_id}, course {course_key}: {existing_registration.status}")
+                        return jsonify({"success": False, "message": "알 수 없는 등록 상태입니다."}), 500
                 else:
-                    logger.error(f"Unknown registration status for student {student_id}, course {course_key}: {existing_registration.status}")
-                    return jsonify({"success": False, "message": "알 수 없는 등록 상태입니다."}), 500
-            else:
-                # Create a new registration
-                new_registration = Registration(course_key=course_key, student_id=student_id, status='Applied')
-                db.session.add(new_registration)
-                logger.info(f"Created new registration for student {student_id}, course {course_key}")
-            # Increment current_students
-            course.current_students += 1
-            db.session.commit()
-            logger.info(f"Successfully applied student {student_id} to course {course_key}")
-            return jsonify({"success": True, "message": "과목 신청이 완료되었습니다."}), 200
+                    new_registration = Registration(course_key=course_key, student_id=student.student_id, status='Applied')
+                    db.session.add(new_registration)
+                    logger.info(f"Created new registration for student {student.student_id}, course {course_key}")
+                
+                course.current_students += 1
+                logger.info(f"Incremented current_students for course {course_key}: {course.current_students}")
+
+                db.session.commit()
+                logger.info("Transaction committed successfully")
+                return jsonify({"success": True, "message": "과목 신청이 완료되었습니다."}), 200
+
+            except SQLAlchemyError as e:
+                db.session.rollback()
+                logger.exception(f"Database error in process_application: {str(e)}")
+                raise
+            finally:
+                db.session.close()
+
+        return process_application()
+
     except SQLAlchemyError as e:
         logger.exception(f"Database error in apply_course: {str(e)}")
         return jsonify({"success": False, "message": "과목 신청 중 데이터베이스 오류가 발생했습니다."}), 500
