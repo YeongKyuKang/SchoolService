@@ -10,7 +10,6 @@ spec:
     app: login-service
   ports:
     - protocol: TCP
-      port: 80         
+      port: 80
       targetPort: 5006
-      nodePort: 30000
-  type: NodePort
+  type: ClusterIP
