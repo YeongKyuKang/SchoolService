@@ -23,9 +23,9 @@ def index():
     try:
         #if current_app.config.get('TESTING', False):
         #, username='Test User', festivals=[], applied_courses=[])
-        #return render_template('index.html')
-        current_user_id = get_jwt_identity()
-        student = Student.query.filter_by(id=current_user_id).first()
+        return render_template('index.html')
+        # current_user_id = get_jwt_identity()
+        # student = Student.query.filter_by(id=current_user_id).first()
 
         # festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
         #                     .order_by(desc(Festival.capacity))\
@@ -33,24 +33,24 @@ def index():
         #                     .all()
 
 
-        applied_courses = db.session.query(Course).join(Registration).filter(
-            Registration.student_id == student.student_id,
-            Registration.status == 'Applied'
-        ).all() if student else []
+        # applied_courses = db.session.query(Course).join(Registration).filter(
+        #     Registration.student_id == student.student_id,
+        #     Registration.status == 'Applied'
+        # ).all() if student else []
 
-        applied_courses_data = [{
-            'id': course.id,
-            'course_name': course.course_name,
-            'professor': course.professor,
-            'credits': course.credits,
-            'department': course.department,
-            'year': course.year
-        } for course in applied_courses]
+        # applied_courses_data = [{
+        #     'id': course.id,
+        #     'course_name': course.course_name,
+        #     'professor': course.professor,
+        #     'credits': course.credits,
+        #     'department': course.department,
+        #     'year': course.year
+        # } for course in applied_courses]
 
-        return render_template('index.html', 
-                               username=student.name if student else 'User',
+        # return render_template('index.html', 
+        #                        username=student.name if student else 'User',
                                
-                               applied_courses=applied_courses_data)
+        #                        applied_courses=applied_courses_data)
     except Exception as e:
         return "Internal Server Error", 500
 
