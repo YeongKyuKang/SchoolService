@@ -14,7 +14,7 @@ def jwt_required_custom(fn):
             verify_jwt_in_request()
             return fn(*args, **kwargs)
         except Exception:
-            return jsonify({"error": "로그인이 필요한 서비스입니다.", "redirect": url_for('main.main', _external=True)}), 401
+            return jsonify({"error": "로그인이 필요한 서비스입니다.", "redirect": url_for('main.login', _external=True)}), 401
     return wrapper
 
 @main.route('/')
