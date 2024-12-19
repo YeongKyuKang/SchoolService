@@ -4,7 +4,7 @@ metadata:
   name: main-service-svc
   labels:
     app: main-service
-  namespace: main-service
+  namespace: default
 spec:
   selector:
     app: main-service
