@@ -75,7 +75,7 @@ def api_festivals():
 def festival():
     return redirect('http://kangyk.com/festival')
 
-@main.route('/news')
+@main.route('/notice')
 @jwt_required_custom
 def news():
     return redirect('http://kangyk.com/notice')
