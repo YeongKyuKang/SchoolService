@@ -8,7 +8,7 @@ class TestMainService(unittest.TestCase):
         self.app = app.test_client()
 
     def test_home_redirect(self):
-        response = self.app.get('/')
+        response = self.app.get('/main')
         if app.config['TESTING']:
             self.assertEqual(response.status_code, 200)  # Expecting successful response in testing mode
         else:
