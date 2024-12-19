@@ -77,7 +77,7 @@ def festival():
 
 @main.route('/notice')
 @jwt_required_custom
-def news():
+def notice():
     return redirect('http://kangyk.com/notice')
 
 @main.route('/course_registration')

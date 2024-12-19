@@ -25,7 +25,7 @@ class TestMainService(unittest.TestCase):
         self.assertIn('http://kangyk.com/festival', response.location)
 
     def test_news_redirect(self):
-        response = self.app.get('/news')
+        response = self.app.get('/notice')
         self.assertEqual(response.status_code, 302)
         self.assertIn('http://kangyk.com/notice', response.location)
 
