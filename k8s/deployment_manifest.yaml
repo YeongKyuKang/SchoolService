@@ -28,6 +28,6 @@ spec:
           - name: DB_NAME
             value: notice_db
         ports:
-          - containerPort: 5002
+          - containerPort: 5004
       imagePullSecrets:
       - name: ghcr-secret
