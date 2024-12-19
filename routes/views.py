@@ -17,13 +17,13 @@ def jwt_optional(f):
 
 @notice.route('/notice')
 @jwt_optional
-def news():
+def notice():
     notices = Notice.query.order_by(Notice.date.desc()).all()
     return render_template('news_main.html', notices=notices)
 
 @notice.route('/notice/<int:notice_id>')
 @jwt_optional
-def news_item(notice_id):
+def notice_item(notice_id):
     notice = Notice.query.get_or_404(notice_id)
     return render_template('news_item.html', notice=notice)
 
