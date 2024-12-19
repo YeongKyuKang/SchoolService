@@ -89,7 +89,7 @@ def course_registration():
 @jwt_required_custom
 def logout():
     if current_app.config.get('TESTING', False):
-        return redirect('http://kangyk.com/main')
+        return redirect('http://kangyk.com/login')
 
     response = make_response(redirect('http://kangyk.com/login'))
     unset_jwt_cookies(response)
