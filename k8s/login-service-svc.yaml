@@ -4,7 +4,7 @@ metadata:
   name: login-service-svc
   labels:
     app: login-service
-  namespace: login-service
+  namespace: default
 spec:
   selector:
     app: login-service
