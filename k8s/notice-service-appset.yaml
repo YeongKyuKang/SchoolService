@@ -9,7 +9,7 @@ spec:
         elements:
           - name: notice-service-appset
             repoURL: 'git@github.com:YeongKyuKang/notice-service.git'
-            targetRevision: noticeService
+            targetRevision: NoticeService
             path: 'k8s'
   template:
     metadata:

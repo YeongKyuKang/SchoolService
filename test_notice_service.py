@@ -32,10 +32,10 @@ class TestNoticeService(unittest.TestCase):
     def test_home_redirect(self):
         response = self.app.get('/')
         self.assertEqual(response.status_code, 302)
-        self.assertTrue('/news' in response.location)
+        self.assertTrue('/notice' in response.location)
 
     def test_news_page(self):
-        response = self.app.get('/news')
+        response = self.app.get('/notice')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'University Notices', response.data)
 
@@ -48,7 +48,7 @@ class TestNoticeService(unittest.TestCase):
             db.session.commit()  # Commit to persist the transaction
 
             # Fetch the notice by ID from the website
-            response = self.app.get(f'/news/{notice.id}')
+            response = self.app.get(f'/notice/{notice.id}')
             self.assertEqual(response.status_code, 200)
             self.assertIn(b'Test Notice', response.data)  # Check if the title is present in the response
             self.assertIn(b'Test Content', response.data)  # Check if the content is present in the response
