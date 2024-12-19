@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: notice-service-container
-  namespace: notice-service
+  namespace: default
 spec:
   replicas: 3
   selector:
