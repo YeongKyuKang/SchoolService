@@ -12,4 +12,7 @@ spec:
     - protocol: TCP
       port: 80         
       targetPort: 5003
+    - protocol: TCP
+      port: 443
+      targetPort: 5003
   type: LoadBalancer
