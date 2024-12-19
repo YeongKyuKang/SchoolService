@@ -22,15 +22,16 @@ def jwt_required_custom(fn):
 def index():
     try:
         #if current_app.config.get('TESTING', False):
-        return render_template('index.html')#, username='Test User', festivals=[], applied_courses=[])
+        #, username='Test User', festivals=[], applied_courses=[])
 
-        # current_user_id = get_jwt_identity()
-        # student = Student.query.filter_by(id=current_user_id).first()
+        current_user_id = get_jwt_identity()
+        student = Student.query.filter_by(id=current_user_id).first()
 
-        # festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
-        #                     .order_by(desc(Festival.capacity))\
-        #                     .limit(9)\
-        #                     .all()
+        festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
+                            .order_by(desc(Festival.capacity))\
+                            .limit(9)\
+                            .all()
+        return render_template('index.html')
 
         # applied_courses = db.session.query(Course).join(Registration).filter(
         #     Registration.student_id == student.student_id,
@@ -53,22 +54,22 @@ def index():
     except Exception as e:
         return "Internal Server Error", 500
 
-# @main.route('/api/festivals')
-# @jwt_required_custom
-# def api_festivals():
-#     try:
-#         if current_app.config.get('TESTING', False):
-#             return jsonify({"success": True, "festivals": [{"name": "Test Festival", "capacity": 100, "total_seats": 10}]})
+@main.route('/api/festivals')
+@jwt_required_custom
+def api_festivals():
+    try:
+        if current_app.config.get('TESTING', False):
+            return jsonify({"success": True, "festivals": [{"name": "Test Festival", "capacity": 100, "total_seats": 10}]})
 
-#         festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
-#                             .order_by(desc(Festival.capacity))\
-#                             .limit(9)\
-#                             .all()
+        festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
+                            .order_by(desc(Festival.capacity))\
+                            .limit(9)\
+                            .all()
 
-#         festivals_data = [festival.to_dict() for festival in festivals]
-#         return jsonify({"success": True, "festivals": festivals_data})
-#     except Exception:
-#         return jsonify({"success": False, "error": "An unexpected error occurred"}), 500
+        festivals_data = [festival.to_dict() for festival in festivals]
+        return jsonify({"success": True, "festivals": festivals_data})
+    except Exception:
+        return jsonify({"success": False, "error": "An unexpected error occurred"}), 500
 
 @main.route('/festival')
 @jwt_required_custom
