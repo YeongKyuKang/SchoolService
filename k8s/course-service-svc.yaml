@@ -4,7 +4,7 @@ metadata:
   name: course-service-svc
   labels:
     app: course-service
-  namespace: course-service
+  namespace: default
 spec:
   selector:
     app: course-service

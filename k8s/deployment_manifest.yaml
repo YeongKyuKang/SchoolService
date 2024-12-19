@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: course-service-container
-  namespace: course-service
+  namespace: default
 spec:
   replicas: 3
   selector:
