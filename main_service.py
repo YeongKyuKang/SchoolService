@@ -20,11 +20,11 @@ db.init_app(app)
 
 app.register_blueprint(main_blueprint)
 
-@app.route('/')
+@app.route('/main')
 def index():
     try:
         verify_jwt_in_request()      
-        return redirect(url_for('main.index'))
+        return redirect(url_for('/main/index'))
     except Exception as e:
          
         return render_template('auth_required.html'), 401
