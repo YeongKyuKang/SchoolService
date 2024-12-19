@@ -21,7 +21,7 @@ def news():
     notices = Notice.query.order_by(Notice.date.desc()).all()
     return render_template('news_main.html', notices=notices)
 
-@notice.route('/notice/<int:notice_id>')
+@notice.route('/news/<int:notice_id>')
 @jwt_optional
 def news_item(notice_id):
     notice = Notice.query.get_or_404(notice_id)
