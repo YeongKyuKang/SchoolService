@@ -32,5 +32,7 @@ spec:
             value: "3306"
           - name: DB_NAME
             value: festival_db
+        ports:
+          - containerPort: 5002
       imagePullSecrets:
       - name: ghcr-secret
