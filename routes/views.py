@@ -14,10 +14,10 @@ def jwt_required_custom(fn):
             verify_jwt_in_request()
             return fn(*args, **kwargs)
         except Exception:
-            return jsonify({"error": "로그인이 필요한 서비스입니다.", "redirect": url_for('main.login', _external=True)}), 401
+            return jsonify({"error": "로그인이 필요한 서비스입니다.", "redirect": url_for('main.main', _external=True)}), 401
     return wrapper
 
-@main.route('/main')
+@main.route('/dashboard')
 @jwt_required_custom
 def index():
     try:
@@ -75,9 +75,9 @@ def api_festivals():
 def festival():
     return redirect('http://kangyk.com/festival')
 
-@main.route('/notice')
+@main.route('/news')
 @jwt_required_custom
-def notice():
+def news():
     return redirect('http://kangyk.com/notice')
 
 @main.route('/course_registration')
@@ -89,7 +89,7 @@ def course_registration():
 @jwt_required_custom
 def logout():
     if current_app.config.get('TESTING', False):
-        return redirect('http://kangyk.com/login')
+        return redirect('http://kangyk.com/main')
 
     response = make_response(redirect('http://kangyk.com/login'))
     unset_jwt_cookies(response)
