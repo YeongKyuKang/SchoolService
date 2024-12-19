@@ -4,7 +4,7 @@ metadata:
   name: festival-service-svc
   labels:
     app: festival-service
-  namespace: festival-service
+  namespace: default
 spec:
   selector:
     app: festival-service
