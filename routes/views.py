@@ -29,7 +29,7 @@ def get_current_user_id():
         return TEST_USER_ID
     return get_jwt_identity()
 
-@course.route('/get_courses', methods=['GET'])
+@course.route('/course_registration/get_courses', methods=['GET'])
 @jwt_req_custom
 def get_courses():
     logger.info('Fetching courses')
@@ -69,7 +69,7 @@ def get_courses():
         logger.error(f'Error occurred while fetching courses: {str(e)}')
         return jsonify({"success": False, "message": "An error occurred while fetching courses"}), 500
 
-@course.route('/dropdown_options', methods=['GET'])
+@course.route('/course_registration/dropdown_options', methods=['GET'])
 @jwt_req_custom
 def get_dropdown_options():
     logger.info('Fetching dropdown options')
@@ -86,13 +86,13 @@ def get_dropdown_options():
         logger.error(f'Error occurred while fetching dropdown options: {str(e)}')
         return jsonify({"success": False, "message": "An error occurred while fetching dropdown options"}), 500
 
-@course.route('/credits')
+@course.route('/course_registration/credits')
 @jwt_req_custom
 def get_credits():
     logger.info('Redirecting to get_dropdown_options for credits')
     return redirect(url_for('course.get_dropdown_options'))
 
-@course.route('/departments')
+@course.route('/course_registration/departments')
 @jwt_req_custom
 def get_departments():
     logger.info('Redirecting to get_dropdown_options for departments')
@@ -100,7 +100,7 @@ def get_departments():
 
 
 
-@course.route('/search_courses')
+@course.route('/course_registration/search_courses')
 @jwt_req_custom
 def search_courses():
     logger.info('Searching courses')
@@ -137,7 +137,7 @@ def search_courses():
         logger.error(f'Error occurred while searching courses: {str(e)}')
         return jsonify({"success": False, "message": "An error occurred while searching courses"}), 500
 
-@course.route('/apply_course', methods=['POST'])
+@course.route('/course_registration/apply_course', methods=['POST'])
 @jwt_req_custom
 def apply_course():
     data = request.get_json()
@@ -195,7 +195,7 @@ def apply_course():
         logger.error(f'Error occurred while applying for course: {str(e)}')
         return jsonify({"success": False, "message": str(e)}), 500
 
-@course.route('/cancel_course', methods=['POST'])
+@course.route('/course_registration/cancel_course', methods=['POST'])
 @jwt_req_custom
 def cancel_course():
     data = request.get_json()
@@ -238,7 +238,7 @@ def cancel_course():
         logger.error(f'Error occurred while cancelling course: {str(e)}')
         return jsonify({"success": False, "message": str(e)}), 500
 
-@course.route('/get_applied_courses', methods=['GET'])
+@course.route('/course_registration/get_applied_courses', methods=['GET'])
 @jwt_req_custom
 def get_applied_courses():
     logger.info('Fetching applied courses')
