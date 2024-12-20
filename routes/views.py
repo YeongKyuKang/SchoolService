@@ -54,10 +54,10 @@ def get_current_user_id():
         return TEST_USER_ID
     return get_jwt_identity()
 
-@course.route('/api/get_courses', methods=['GET'])
+@course.route('/course_registration/get_courses', methods=['GET'])
 @jwt_req_custom
 def get_courses():
-   
+    logger.info('Fetching courses')
     try:
         # Return empty list for courses
         courses_data = []
@@ -84,14 +84,14 @@ def get_courses():
             } for course in applied_courses]
         else:
             applied_courses_data = []
-        
+        logger.info(f'Fetched {len(applied_courses_data)} applied courses for user {current_user_id}')
         return jsonify({
             "success": True, 
             "courses": courses_data,
             "appliedCourses": applied_courses_data
         }), 200
     except Exception as e:
-       
+        logger.error(f'Error occurred while fetching courses: {str(e)}')
         return jsonify({"success": False, "message": "An error occurred while fetching courses"}), 500
 
 @course.route('/course_registration')
@@ -102,28 +102,28 @@ def course_service():
 @course.route('/api/dropdown_options', methods=['GET'])
 @jwt_required(optional=True)
 def get_dropdown_options():
-   
+    logger.info('Fetching dropdown options')
     try:
         credits = db.session.query(Course.credits).distinct().order_by(Course.credits).all()
         departments = db.session.query(Course.department).distinct().order_by(Course.department).all()
-        
+        logger.info(f'Fetched {len(credits)} credit options and {len(departments)} department options')
         return jsonify({
             "success": True,
             "credits": [credit[0] for credit in credits],
             "departments": [dept[0] for dept in departments if dept[0]]  # None 값 제외
         }), 200
     except Exception as e:
-        
+        logger.error(f'Error occurred while fetching dropdown options: {str(e)}')
         return jsonify({"success": False, "message": "An error occurred while fetching dropdown options"}), 500
 
 @course.route('/api/credits')
 def get_credits():
-    
+    logger.info('Redirecting to get_dropdown_options for credits')
     return redirect(url_for('course.get_dropdown_options'))
 
 @course.route('/api/departments')
 def get_departments():
-   
+    logger.info('Redirecting to get_dropdown_options for departments')
     return redirect(url_for('course.get_dropdown_options'))
 
 
@@ -249,7 +249,7 @@ def apply_course():
         logger.exception(f"Unexpected error in apply_course: {str(e)}")
         return jsonify({"success": False, "message": "과목 신청 중 예기치 못한 오류가 발생했습니다."}), 500
 
-@course.route('/api/cancel_course', methods=['POST'])
+@course.route('/course_registration/cancel_course', methods=['POST'])
 @jwt_req_custom
 def cancel_course():
     logger.info("Received request to /api/cancel_course")
@@ -294,15 +294,15 @@ def cancel_course():
         logger.exception(f"Unexpected error in cancel_course: {str(e)}")
         return jsonify({"success": False, "message": "과목 취소 중 예기치 못한 오류가 발생했습니다."}), 500
 
-@course.route('/api/get_applied_courses', methods=['GET'])
+@course.route('/course_registration/get_applied_courses', methods=['GET'])
 @jwt_req_custom
 def get_applied_courses():
-   
+    logger.info('Fetching applied courses')
     try:
         user_id = get_current_user_id()
-        
         student = Student.query.filter_by(id=user_id).first()
         if not student:
+            logger.warning(f'Student not found for user {user_id}')
             return jsonify({"success": False, "message": "Student not found"}), 404
 
         applied_courses = db.session.query(Course).join(Registration).filter(
@@ -318,25 +318,27 @@ def get_applied_courses():
             'department': course.department,
             'year': course.year
         } for course in applied_courses]
-
+        logger.info(f'Fetched {len(courses_data)} applied courses for user {user_id}')
         return jsonify({"success": True, "courses": courses_data}), 200
 
     except SQLAlchemyError as e:
+        logger.error(f'Database error occurred while fetching applied courses: {str(e)}')
         return jsonify({"success": False, "message": "Database error occurred"}), 500
     except Exception as e:
+        logger.error(f'Error occurred while fetching applied courses: {str(e)}')
         return jsonify({"success": False, "message": str(e)}), 500
 
-@course.route('/redirect_to_main')
+@course.route('/main')
 def redirect_to_main():
    
     return redirect('kangyk.com/main')
 
-@course.route('/redirect_to_festival')
+@course.route('/festival')
 def redirect_to_festival():
    
     return redirect('http://kangyk.com/festival')
 
-@course.route('/redirect_to_news')
+@course.route('/notice')
 def redirect_to_news():
    
     return redirect('http://kangyk.com/notice')
