@@ -1,4 +1,31 @@
-S256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384";
+# HTTP -> HTTPS 리디렉션 (kangyk.com 및 www.kangyk.com)
+server {
+    listen 80;
+    server_name kangyk.com www.kangyk.com;
+
+    location / {
+        return 301 https://$host$request_uri;  # HTTPS로 리디렉션
+    }
+
+    # Let's Encrypt 챌린지 처리 (인증서 발급용)
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+}
+
+# HTTPS 설정 (kangyk.com 및 www.kangyk.com)
+server {
+    listen 443 ssl http2;
+    server_name kangyk.com www.kangyk.com;
+
+    # SSL 인증서 경로 (필요시 주석 제거)
+    ssl_certificate /etc/letsencrypt/live/kangyk.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kangyk.com/privkey.pem;
+
+    # SSL 프로토콜 설정
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_ciphers "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384";
 
     # HSTS (HTTP Strict Transport Security) 설정
     #add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
