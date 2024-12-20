@@ -1,0 +1,74 @@
+S256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384";
+
+    # HSTS (HTTP Strict Transport Security) 설정
+    #add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
+
+    # 보안 헤더 추가
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+
+    location / {
+            proxy_pass http://login.kangyk.com;
+            proxy_redirect off;
+    }
+
+    # /login 경로의 요청을 login-service-svc로 프록시
+    location /login {
+        proxy_pass http://login.kangyk.com;  # 로그인 서비스 LoadBalancer IP
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # /main 경로의 요청을 main-service-svc로 프록시
+    location /main {
+        proxy_pass http://main.kangyk.com/main;  # 메인 서비스 LoadBalancer IP
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # /notice 경로의 요청을 notice-service-svc로 프록시
+    location /notice {
+        proxy_pass http://notice.kangyk.com/;  # 노티스 서비스 LoadBalancer IP
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /news {
+        proxy_pass http://notice.kangyk.com/news;  # 노티스 서비스 LoadBalancer IP
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    # /course_registration 경로의 요청을 course-service-svc로 프록시
+    location /course_registration {
+        proxy_pass http://course.kangyk.com/course_registration;  # 코스 서비스 LoadBalancer IP
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # /festival 경로의 요청을 festival-service-svc로 프록시
+    location /festival {
+        proxy_pass http://festival.kangyk.com/festival;  # 페스티벌 서비스 LoadBalancer IP
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    location /argocd {
+        proxy_pass http://argocd.kangyk.com/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
