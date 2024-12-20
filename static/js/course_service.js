@@ -8,7 +8,7 @@ const itemsPerPage = 5;
 
 async function fetchCourseData() {
     try {
-        const response = await fetch('/api/get_courses');
+        const response = await fetch('/course_registration/course_registration/get_courses');
         if (!response.ok) {
             throw new Error('Failed to fetch course data');
         }
@@ -30,7 +30,7 @@ async function fetchCourseData() {
 
 async function fetchDropdownOptions() {
     try {
-        const response = await fetch('/api/dropdown_options');
+        const response = await fetch('/course_registration/dropdown_options');
         if (!response.ok) {
             throw new Error('Failed to fetch dropdown options');
         }
@@ -203,7 +203,7 @@ function updateAppliedCourses() {
 
 async function handleApply(courseKey) {
     try {
-        const response = await fetch('/api/apply_course', {
+        const response = await fetch('/apply_course', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -242,7 +242,7 @@ function applyCourse(courseKey) {
 }
 
 function cancelCourse(courseKey) {
-    fetch('/api/cancel_course', {
+    fetch('/course_registration/cancel_course', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -273,7 +273,7 @@ function filterCourses(credits, department) {
         return;
     }
     showLoadingIndicator();
-    fetch(`/api/search_courses?credits=${credits}&department=${department}`)
+    fetch(`/course_registration/search_courses?credits=${credits}&department=${department}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -303,7 +303,7 @@ function filterCoursesByName(searchTerm) {
         return;
     }
     showLoadingIndicator();
-    fetch(`/api/search_courses?course_name=${encodeURIComponent(searchTerm)}`)
+    fetch(`/course_registration/search_courses?course_name=${encodeURIComponent(searchTerm)}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -329,7 +329,7 @@ function filterCoursesByName(searchTerm) {
 
 function fetchAllCourses() {
     showLoadingIndicator();
-    fetch('/api/search_courses')
+    fetch('/course_registration/search_courses')
         .then(response => response.json())
         .then(data => {
             if (data.success) {

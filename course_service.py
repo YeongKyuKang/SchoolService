@@ -15,7 +15,7 @@ if env == 'testing':
 else:
     app.config.from_object(Config)
     app.config['TESTING'] = os.environ.get('FLASK_TESTING', 'False') == 'True'
-
+    
 # Initialize extensions
 db.init_app(app)
 jwt = JWTManager(app)
@@ -43,18 +43,10 @@ def before_request():
                 return jsonify({"error": "로그인이 필요한 서비스입니다.", "redirect": url_for('course.login', _external=True)}), 401
             return render_template('auth_required.html')
 
-@app.route('/')
-def index():
-    
-    return redirect(url_for('course_registration'))
-
 @app.route('/course_registration')
 def course_registration():
     try:
         verify_jwt_in_request()
-        
-        
-        
         return render_template('course_service.html')
     except Exception as e:
        return render_template('auth_required.html'), 401
