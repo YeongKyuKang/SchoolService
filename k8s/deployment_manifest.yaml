@@ -26,5 +26,7 @@ spec:
             value: mysql
           - name: DB_NAME
             value: user_db
+        ports:
+          - containerPort: 5003
       imagePullSecrets:
       - name: ghcr-secret
