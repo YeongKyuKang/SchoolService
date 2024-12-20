@@ -8,7 +8,7 @@ const itemsPerPage = 5;
 
 async function fetchCourseData() {
     try {
-        const response = await fetch('/course_registration/course_registration/get_courses');
+        const response = await fetch('/course_registration/get_courses');
         if (!response.ok) {
             throw new Error('Failed to fetch course data');
         }
@@ -18,6 +18,7 @@ async function fetchCourseData() {
         keptCourses = data.keptCourses || [];
         console.log('Available Courses:', courses);
         console.log('Applied Courses:', appliedCourses);
+        console.log('Kept Courses:', keptCourses);
         showInitialMessage();  // 초기 메시지 표시
         updateAppliedCourses();
         
@@ -202,7 +203,7 @@ function updateAppliedCourses() {
 
 async function handleApply(courseKey) {
     try {
-        const response = await fetch('/apply_course', {
+        const response = await fetch('/course_registration/apply_course', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
