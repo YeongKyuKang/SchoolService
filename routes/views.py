@@ -4,11 +4,15 @@ from . import festival
 from models import Reservation, Festival, User, db
 from datetime import datetime
 from functools import wraps
-from config import TestConfig
+from config import Config
 from flask import Flask
 
 app = Flask(__name__)
-app.config.from_object(TestConfig)
+app.config.from_object(Config)
+
+# 로깅 설정
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 TEST_USER_ID = 99
 
@@ -185,12 +189,12 @@ def get_festivals():
 @festival.route('/login')
 @jwt_req_custom
 def login():
-    return redirect("http://kangyk.com/login")
+    return redirect("http://localhost:5006/login")
 
 @festival.route('/logout')
 @jwt_req_custom
 def logout():
-   response = make_response(redirect('http://kangyk.com/login'))
+   response = make_response(redirect('http://localhost:5006/login'))
    unset_jwt_cookies(response)
    return response
 
@@ -198,15 +202,15 @@ def logout():
 @festival.route('/redirect_to_main')
 @jwt_req_custom
 def redirect_to_main():
-    return redirect("http://kangyk.com/main")
+    return redirect("http://localhost:5003/")
 
 @festival.route('/redirect_to_news')
 @jwt_req_custom
 def redirect_to_news():
-    return redirect("http://kangyk.com/notice")
+    return redirect("http://localhost:5004/")
 
 @festival.route('/redirect_to_course')
 @jwt_req_custom
 def redirect_to_course():
-    return redirect("http://kangyk.com/course_registration")
+    return redirect("http://localhost:5001/")
 
