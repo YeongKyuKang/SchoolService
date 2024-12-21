@@ -12,7 +12,4 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 5006
-    - protocol: TCP
-      port: 443
-      targetPort: 5006
-  type: LoadBalancer
+  type: ClusterIP
