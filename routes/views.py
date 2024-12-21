@@ -194,7 +194,7 @@ def logout():
    response = make_response(redirect('http://localhost:5006/login'))
    unset_jwt_cookies(response)
    return response
-<<<<<<< HEAD
+
 
 
 @festival.route('/redirect_to_main')
