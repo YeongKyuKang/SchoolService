@@ -108,7 +108,7 @@ def apply(festival_key):
 
 @festival.route('/festival/apply', methods=['POST'])
 @jwt_req_custom
-def api_apply():
+def post_apply():
     user_id = get_current_user_id()
     data = request.json
     festival_key = data.get('festival_key')
@@ -230,31 +230,21 @@ def get_festivals():
 @festival.route('/login')
 @jwt_req_custom
 def login():
-    logger.info("Redirecting to login page")
     return redirect("http://kangyk.com/login")
 
 @festival.route('/logout')
 def logout():
-   logger.info("User logging out")
    response = make_response(redirect('http://kangyk.com/login'))
    unset_jwt_cookies(response)
    return response
-
-
 @festival.route('/main')
 def main():
-    logger.info("Redirecting to main page")
     return redirect("http://kangyk.com/main")
-
 @festival.route('/notice')
-
 def news():
-    logger.info("Redirecting to notice page")
     return redirect("http://kangyk.com/notice")
 
 @festival.route('/course')
-
 def course():
-    logger.info("Redirecting to course registration page")
     return redirect("http://kangyk.com/course_registration")
 

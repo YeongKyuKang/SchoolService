@@ -50,7 +50,7 @@ class TestFestivalService(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Test Festival', response.data)
 
-    def test_api_apply(self):
+    def test_festival_apply(self):
         data = {
             'festival_key': 'test_festival',
             'seat_number': 'A1'
@@ -62,7 +62,7 @@ class TestFestivalService(unittest.TestCase):
         json_data = json.loads(response.data)
         self.assertTrue(json_data['success'])
 
-    def test_api_cancel_reservation(self):
+    def test_festival_cancel_reservation(self):
         # 먼저 예약을 생성합니다
         user = User.query.filter_by(email="test@example.com").first()
         festival = Festival.query.filter_by(festival_key="test_festival").first()
