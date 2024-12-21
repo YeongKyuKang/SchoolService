@@ -13,12 +13,15 @@ services:
       - DB_NAME=user_db
     depends_on:
       - mysql
+    env_file:
+      - ./.env
     ports:
       - "5006:5006"
   
   mysql:
     image: mysql:8.0
     environment:
+
       MYSQL_ROOT_PASSWORD: mysql
       MYSQL_DATABASE: user_db
     ports:
