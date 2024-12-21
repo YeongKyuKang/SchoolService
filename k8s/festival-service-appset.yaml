@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: festival-service-applicationset
-  namespace: default
+  namespace: festival-service
 spec:
   generators:
     - list:
@@ -22,7 +22,7 @@ spec:
         path: '{{path}}'
       destination:
         server: 'https://kubernetes.default.svc'
-        namespace: default
+        namespace: festival-service
       syncPolicy:
         automated:
           prune: true
