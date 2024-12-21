@@ -19,7 +19,7 @@ if env == 'testing':
 else:
     app.config.from_object(Config)
     app.config['TESTING'] = os.environ.get('FLASK_TESTING', 'False') == 'True'
-    
+
 # Initialize extensions
 db.init_app(app)
 jwt = JWTManager(app)
