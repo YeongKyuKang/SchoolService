@@ -4,12 +4,16 @@ from . import festival
 from models import Reservation, Festival, User, db
 from datetime import datetime
 from functools import wraps
-from config import TestConfig
+from config import Config
 from flask import Flask
 import logging
 
 app = Flask(__name__)
-app.config.from_object(TestConfig)
+app.config.from_object(Config)
+
+# 로깅 설정
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 TEST_USER_ID = 99
 
