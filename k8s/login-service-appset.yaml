@@ -8,7 +8,7 @@ spec:
     - list:
         elements:
           - name: login-service-appset
-            repoURL: 'git@github.com:YeongKyuKang/login-service.git'
+            repoURL: 'git@github.com:YeongKyuKang/SchoolService.git'
             targetRevision: LoginService
             path: 'k8s'
   template:
