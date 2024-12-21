@@ -4,11 +4,16 @@ from . import festival
 from models import Reservation, Festival, User, db
 from datetime import datetime
 from functools import wraps
-from config import TestConfig
+from config import Config
 from flask import Flask
+import logging
 
 app = Flask(__name__)
-app.config.from_object(TestConfig)
+app.config.from_object(Config)
+
+# 로깅 설정
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 TEST_USER_ID = 99
 
@@ -94,14 +99,19 @@ def api_apply():
     data = request.json
     festival_key = data.get('festival_key')
     seat_number = data.get('seat_number')
+    logger.info(f"Received application request for festival: {festival_key}, seat: {seat_number}, user: {user_id}")
+
     if not festival_key or not seat_number:
+        logger.warning(f"Invalid request data: festival_key={festival_key}, seat_number={seat_number}")
         return jsonify({"success": False, "message": "축제 키와 좌석 번호가 필요합니다."}), 400
 
     festival = Festival.query.filter_by(festival_key=festival_key).first()
     if not festival:
+        logger.error(f"Festival not found: {festival_key}")
         return jsonify({"success": False, "message": "해당 축제를 찾을 수 없습니다."}), 404
 
     if festival.capacity >= festival.total_seats:
+        logger.warning(f"Festival {festival_key} is full. Capacity: {festival.capacity}/{festival.total_seats}")
         return jsonify({"success": False, "message": "축제가 이미 만석입니다."}), 400
 
     existing_reservation = Reservation.query.filter_by(
@@ -111,6 +121,7 @@ def api_apply():
     ).first()
 
     if existing_reservation:
+        logger.warning(f"Seat {seat_number} already reserved for festival {festival_key}")
         return jsonify({"success": False, "message": "이미 예약된 좌석입니다."}), 400
 
     user_reservation = Reservation.query.filter_by(
@@ -120,6 +131,7 @@ def api_apply():
     ).first()
 
     if user_reservation:
+        logger.warning(f"User {user_id} already has a reservation for festival {festival_key}")
         return jsonify({"success": False, "message": "이미 이 축제에 예약하셨습니다."}), 400
 
     new_reservation = Reservation(
@@ -133,9 +145,11 @@ def api_apply():
         db.session.add(new_reservation)
         festival.capacity += 1
         db.session.commit()
+        logger.info(f"Reservation successful: User {user_id}, Festival {festival_key}, Seat {seat_number}")
         return jsonify({"success": True, "message": "예약이 완료되었습니다."}), 200
     except Exception as e:
         db.session.rollback()
+        logger.error(f"Error during reservation: {str(e)}")
         return jsonify({"success": False, "message": "예약 중 오류가 발생했습니다."}), 500
 
 @festival.route('/api/cancel_reservation/<int:reservation_id>', methods=['POST'])
