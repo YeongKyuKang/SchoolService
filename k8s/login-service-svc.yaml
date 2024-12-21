@@ -4,7 +4,7 @@ metadata:
   name: login-service-svc
   labels:
     app: login-service
-  namespace: login-service
+  namespace: default
 spec:
   selector:
     app: login-service
@@ -12,4 +12,4 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 5006
-  type: ClusterIP
+  type: LoadBalancer
