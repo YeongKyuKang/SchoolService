@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: login-service-container
-  namespace: default
+  namespace: login-service
 spec:
   replicas: 3
   selector:
@@ -32,7 +32,5 @@ spec:
             value: "3306"
           - name: DB_NAME
             value: user_db
-        ports:
-          - containerPort: 5006
       imagePullSecrets:
       - name: ghcr-secret

@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: login-service-applicationset
-  namespace: default
+  namespace: login-service
 spec:
   generators:
     - list:
@@ -22,7 +22,7 @@ spec:
         path: '{{path}}'
       destination:
         server: 'https://kubernetes.default.svc'
-        namespace: default
+        namespace: login-service
       syncPolicy:
         automated:
           prune: true
