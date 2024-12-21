@@ -3,22 +3,15 @@ from flask_jwt_extended import JWTManager, verify_jwt_in_request, get_jwt_identi
 from flask_sqlalchemy import SQLAlchemy
 from config import Config, TestConfig
 from models import db
-import sys
 from routes import course as course_blueprint
 import os
 import logging
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
 env = os.environ.get('FLASK_ENV')
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
 
 if env == 'testing':
     app.config.from_object(TestConfig)
@@ -39,41 +32,52 @@ app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_COOKIE_SECURE'] = False  # Set to True in production
 app.config['JWT_COOKIE_SAMESITE'] = 'Lax'  # Set to 'Strict' in production
 app.config['JWT_ERROR_MESSAGE_KEY'] = 'error'
+app.config['JWT_EXEMPT_ROUTES'] = ['/api/dropdown_options']
 
-
-
-@jwt.unauthorized_loader
-def unauthorized_callback(callback):
-    logger.error(f"인증되지 않은 접근 시도: {callback}")
-    return jsonify({"error": "인증되지 않은 접근"}), 401
-
-@jwt.invalid_token_loader
-def invalid_token_callback(callback):
-    logger.error(f"유효하지 않은 토큰: {callback}")
-    return jsonify({"error": "유효하지 않은 토큰"}), 401
-
-@jwt.expired_token_loader
-def expired_token_callback(jwt_payload):
-    logger.error(f"만료된 토큰: {jwt_payload}")
-    return jsonify({"error": "토큰이 만료되었습니다"}), 401
 
 @app.before_request
 def before_request():
-    logger.info(f"요청 받음: {request.method} {request.path}")
-    if app.config['TESTING'] or not app.config.get('JWT_REQUIRED', True):
-        logger.info("JWT 검증 건너뜀: 테스트 환경 또는 JWT가 필요하지 않음")
+    logger.info(f"Received request: {request.method} {request.path}")
+    
+    if app.config['TESTING']:
+        logger.debug("Testing environment detected, skipping JWT verification")
         return
-
-    if request.endpoint and request.endpoint != 'static':
+    
+    if not app.config.get('JWT_REQUIRED', True):
+        logger.debug("JWT verification is not required, skipping")
+        return
+    
+    if request.endpoint and request.endpoint != 'course.get_dropdown_options':
+        logger.debug(f"Processing request for endpoint: {request.endpoint}")
         try:
-            logger.info(f"엔드포인트 {request.endpoint}에 대한 JWT 검증 시도")
             verify_jwt_in_request()
-            logger.info("JWT 검증 성공")
+            logger.info("JWT verification successful")
         except Exception as e:
-            logger.error(f"JWT 검증 실패: {str(e)}")
+            logger.error(f"JWT verification failed: {str(e)}")
             if request.is_json:
-                return jsonify({"error": "로그인이 필요한 서비스입니다.", "redirect": url_for('course.login', _external=True)}), 401
+                logger.info("Returning JSON response for authentication failure")
+                return jsonify({
+                    "error": "로그인이 필요한 서비스입니다.", 
+                    "redirect": url_for('course.login', _external=True)
+                }), 401
+            logger.info("Rendering auth_required template")
             return render_template('auth_required.html')
+    else:
+        logger.debug("Skipping JWT verification for static endpoint")
+
+
+@app.route('/')
+def index():
+    return redirect(url_for('course_registration'))
+
+@app.route('/course_registration')
+def course_registration():
+    try:
+        verify_jwt_in_request()
+        return render_template('course_service.html')
+    except Exception as e:
+       return render_template('auth_required.html'), 401
+
 
 @app.errorhandler(400)
 def bad_request(error):

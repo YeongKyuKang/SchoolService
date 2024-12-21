@@ -48,6 +48,7 @@ CREATE TABLE `students` (
 -- Insert data into students
 INSERT INTO `students` VALUES (12,'20230001','John Doe','john.doe@example.com','01012345678','Computer Science','2024-11-29 16:40:35'),(13,'20230002','Jane Smith','jane.smith@example.com','01023456789','Mathematics','2024-11-29 16:40:35'),(14,'20230003','Alice Kim','alice.kim@example.com','01034567890','Physics','2024-11-29 16:40:35'),(15,'20230004','Bob Lee','bob.lee@example.com','01045678901','Chemistry','2024-11-29 16:40:35'),(16,'20230005','Charlie Park','charlie.park@example.com','01056789012','Biology','2024-11-29 16:40:35');
 
+
 -- Create registrations table
 CREATE TABLE `registrations` (
   `id` int NOT NULL AUTO_INCREMENT,
