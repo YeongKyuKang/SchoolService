@@ -4,12 +4,12 @@ metadata:
   name: festival-service-svc
   labels:
     app: festival-service
-  namespace: default
+  namespace: festival-service
 spec:
   selector:
     app: festival-service
   ports:
     - protocol: TCP
       port: 80         
-      targetPort: 5002
-  type: LoadBalancer
+      targetPort: 5006
+  type: ClusterIP
