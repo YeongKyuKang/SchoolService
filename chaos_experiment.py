@@ -24,7 +24,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 jwt = JWTManager(app)
 
-BASE_URL = "http://kangyk.com/festival"  # festival_service의 URL
+BASE_URL = "http://localhost:5002"  # festival_service의 URL
 
 used_ids = set()
 
