@@ -7,15 +7,10 @@ from routes import festival as festival_blueprint
 import os
 
 app = Flask(__name__)
-env = os.environ.get('FLASK_ENV')
 
-if env == 'testing':
-    app.config.from_object(TestConfig)
-    app.config['TESTING'] = True
-else:
-    app.config.from_object(Config)
-    app.config['TESTING'] = os.environ.get('FLASK_TESTING', 'False') == 'True'
 
+
+app.config.from_object(TestConfig)
 jwt = JWTManager(app)
 db.init_app(app)
 
