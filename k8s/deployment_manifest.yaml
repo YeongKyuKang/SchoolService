@@ -17,17 +17,22 @@ spec:
       - name: notice-service-container
         image: ghcr.io/yeongkyukang/notice_service:latest
         env:
+          - name: JWT_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: jwt-secret
+                key: JWT_SECRET_KEY
           - name: DB_USER
-            value: root
+            value: admin
           - name: DB_PASSWORD
-            value: mysql
+            value: "P*ssword123"
           - name: DB_HOST
-            value: mysql-service.default
+            value: "121.160.41.222"
           - name: DB_PORT
             value: "3306"
           - name: DB_NAME
             value: notice_db
         ports:
-          - containerPort: 5004
+          - containerPort: 5003
       imagePullSecrets:
       - name: ghcr-secret
