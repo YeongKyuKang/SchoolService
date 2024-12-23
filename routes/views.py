@@ -5,6 +5,7 @@ from . import main
 from models import db, Course, Registration, Student, Festival
 from sqlalchemy import desc
 import logging
+from .festival_service_api import FestivalServiceAPI
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -40,13 +41,12 @@ def index():
         student = Student.query.filter_by(id=current_user_id).first()
         logger.info(f"Retrieved student: {student}")
 
-        logger.debug("QQQQQQQQQQQQQQQQuerying festivalsQQQQQQQQQQQQQQQ")
-        festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
-                            .order_by(desc(Festival.capacity))\
-                            .limit(9)\
-                            .all()
-        logger.info(f"Retrieved {len(festivals)} festivals")
-
+    #     logger.debug("QQQQQQQQQQQQQQQQuerying festivalsQQQQQQQQQQQQQQQ")
+    #     festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
+    #                         .order_by(desc(Festival.capacity))\
+    #                         .limit(9)\
+    #                         .all()
+    #     logger.info(f"Retrieved {len(festivals)} festivals")
         logger.debug("QQQQQQQQQQQQQQQQQuerying applied coursesQQQQQQQQQQQQQQQQQQQQQQQQ")
         applied_courses = db.session.query(Course).join(Registration).filter(
             Registration.student_id == student.student_id,
@@ -64,7 +64,10 @@ def index():
         logger.debug("Rendering index template")
         return render_template('index.html', 
                                username=student.name if student else 'User',
+<<<<<<< HEAD
                                festivals=festivals,
+=======
+>>>>>>> parent of 9afccd4 (Update views.py)
                                applied_courses=applied_courses_data)
     except Exception as e:
         logger.error(f"Error in index function: {str(e)}", exc_info=True)
@@ -78,6 +81,7 @@ def api_festivals():
         if current_app.config.get('TESTING', False):
             logger.debug("Testing mode detected, returning test data")
             return jsonify({"success": True, "festivals": [{"name": "Test Festival", "capacity": 100, "total_seats": 10}]})
+<<<<<<< HEAD
         logger.debug("Querying festivals")
         festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
                             .order_by(desc(Festival.capacity))\
@@ -87,6 +91,19 @@ def api_festivals():
         festivals_data = [festival.to_dict() for festival in festivals]
         logger.debug("Returning festivals data")
         return jsonify({"success": True, "festivals": festivals_data})
+=======
+        
+        # Use FestivalServiceAPI to fetch festivals
+        festival_service = FestivalServiceAPI()
+        result = festival_service.get_festivals()
+        
+        if result['success']:
+            logger.info(f"Retrieved {len(result['festivals'])} festivals")
+            return jsonify(result)
+        else:
+            logger.error(f"Error fetching festivals: {result['error']}")
+            return jsonify({"success": False, "error": result['error']}), 500
+>>>>>>> parent of 9afccd4 (Update views.py)
     except Exception as e:
         logger.error(f"Error in api_festivals function: {str(e)}", exc_info=True)
         return jsonify({"success": False, "error": "An unexpected error occurred"}), 500
@@ -125,4 +142,9 @@ def logout():
 def login():
     logger.info("Entering main function")
     logger.debug("Redirecting to login page")
+<<<<<<< HEAD
     return redirect('http://kangyk.com/login')
+=======
+    return redirect('http://kangyk.com/login')
+
+>>>>>>> parent of 9afccd4 (Update views.py)
