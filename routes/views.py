@@ -15,27 +15,27 @@ def jwt_optional(f):
         return f(*args, **kwargs)
     return wrapper
 
-@notice.route('/news')
+@notice.route('/notice/news')
 @jwt_optional
 def news():
     notices = Notice.query.order_by(Notice.date.desc()).all()
     return render_template('news_main.html', notices=notices)
 
-@notice.route('/news/<int:notice_id>')
+@notice.route('/notice/news/<int:notice_id>')
 @jwt_optional
 def news_item(notice_id):
     notice = Notice.query.get_or_404(notice_id)
     return render_template('news_item.html', notice=notice)
 
-@notice.route('/redirect_to_main')
+@notice.route('/main')
 def redirect_to_main():
     return redirect('http://kangyk.com/main')
 
-@notice.route('/redirect_to_festival')
+@notice.route('/festival')
 def redirect_to_festival():
     return redirect('http://kangyk.com/festival')
 
-@notice.route('/redirect_to_course')
+@notice.route('/course')
 def redirect_to_course():
     return redirect('http://kangyk.com/course_registration')
 
@@ -50,7 +50,7 @@ def logout():
 def login():
     return redirect('http://kangyk.com/login')
 
-@notice.route('/api/notices')
+@notice.route('/notice/api/notices')
 def get_notices():
     notices = Notice.query.order_by(Notice.date.desc()).all()
     return jsonify([{

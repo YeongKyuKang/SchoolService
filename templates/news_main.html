@@ -73,7 +73,7 @@
                 noticeElement.className = 'notice-item notice-grid-item';
                 noticeElement.innerHTML = `
                     
-                    <h3><a href="/news/${notice.id}">${notice.title}</a></h3>
+                    <h3><a href="/notice/news/${notice.id}">${notice.title}</a></h3>
                     <p class="notice-content">${notice.content.substring(0, 100)}...</p>
                     <p class="notice-date">${new Date(notice.date).toLocaleDateString()}</p>
                 `;

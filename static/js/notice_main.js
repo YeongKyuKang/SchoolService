@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let allNotices = [];
 
     function loadNotices() {
-        fetch('/api/notices')
+        fetch('/notice/api/notices')
             .then(response => response.json())
             .then(notices => {
                 allNotices = notices;
