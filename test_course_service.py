@@ -89,7 +89,7 @@ class TestFestivalService(unittest.TestCase):
                          content_type='application/json')
 
         # 신청한 과목 목록을 가져옵니다
-        response = self.client.get('/get_applied_courses')
+        response = self.client.get('/course_registration/get_applied_courses')
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
         self.assertTrue(data['success'])
