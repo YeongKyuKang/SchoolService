@@ -6,9 +6,7 @@ from datetime import datetime
 from functools import wraps
 from flask import Flask
 import logging
-
-app = Flask(__name__)
-
+from .festival_service_api import FestivalServiceAPI
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -27,6 +25,46 @@ def jwt_req_custom(fn):
         return fn(*args, **kwargs)
     return wrapper
 
+@main.route('/main/dashboard')
+@jwt_required_custom
+def index():
+    logger.info("Entering index function")
+    try:
+        if current_app.config.get('TESTING', False):
+            logger.debug("Testing mode detected, returning test data")
+            return render_template('index.html', username='Test User', festivals=[], applied_courses=[])
+
+        current_user_id = get_jwt_identity()
+        logger.debug(f"Current user ID: {current_user_id}")
+        student = Student.query.filter_by(id=current_user_id).first()
+        logger.info(f"Retrieved student: {student}")
+
+        logger.debug("QQQQQQQQQQQQQQQQuerying festivalsQQQQQQQQQQQQQQQ")
+        festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
+                            .order_by(desc(Festival.capacity))\
+                            .limit(9)\
+                            .all()
+        logger.info(f"Retrieved {len(festivals)} festivals")
+
+        logger.debug("QQQQQQQQQQQQQQQQQuerying applied coursesQQQQQQQQQQQQQQQQQQQQQQQQ")
+        applied_courses = db.session.query(Course).join(Registration).filter(
+            Registration.student_id == student.student_id,
+            Registration.status == 'Applied'
+        ).all() if student else []
+        logger.info(f"Retrieved {len(applied_courses)} applied courses")
+        applied_courses_data = [{
+            'id': course.id,
+            'course_name': course.course_name,
+            'professor': course.professor,
+            'credits': course.credits,
+            'department': course.department,
+            'year': course.year
+        } for course in applied_courses]
+        logger.debug("Rendering index template")
+        return render_template('index.html', 
+                               username=student.name if student else 'User',
+                               festivals=festivals,
+                               applied_courses=applied_courses_data)
 def get_current_user_id():
     if app.config['TESTING']:
         logger.info(f"Using test user ID: {TEST_USER_ID}")
@@ -246,21 +284,9 @@ def logout():
    unset_jwt_cookies(response)
    return response
 
-
-@festival.route('/main')
-def main():
-    logger.info("Redirecting to main page")
-    return redirect("http://kangyk.com/main")
-
-@festival.route('/notice')
-
-def news():
-    logger.info("Redirecting to notice page")
-    return redirect("http://kangyk.com/notice")
-
-@festival.route('/course')
-
-def course():
-    logger.info("Redirecting to course registration page")
-    return redirect("http://kangyk.com/course_registration")
+@main.route('/login')
+def login():
+    logger.info("Entering main function")
+    logger.debug("Redirecting to login page")
+    return redirect('http://kangyk.com/login')
 
