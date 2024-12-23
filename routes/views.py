@@ -27,15 +27,15 @@ def news_item(notice_id):
     return render_template('news_item.html', notice=notice)
 
 @notice.route('/main')
-def redirect_to_main():
+def main():
     return redirect('http://kangyk.com/main')
 
 @notice.route('/festival')
-def redirect_to_festival():
+def festival():
     return redirect('http://kangyk.com/festival')
 
 @notice.route('/course_registration')
-def redirect_to_course():
+def course():
     return redirect('http://kangyk.com/course_registration')
 
 @notice.route('/logout')
