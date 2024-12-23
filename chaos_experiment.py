@@ -27,8 +27,8 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 jwt = JWTManager(app)
 
-LOGIN_SERVICE_URL = "http://kangyk.com/login"
-MAIN_SERVICE_URL = "http://kangyk.com/main"
+LOGIN_SERVICE_URL = "http://localhost:5006"
+MAIN_SERVICE_URL = "http://localhost:5003"
 
 login_student_id_iterator = itertools.count(start=20231001)
 login_user_id_iterator = itertools.count(start=1)
