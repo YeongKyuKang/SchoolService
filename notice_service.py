@@ -30,7 +30,7 @@ def index():
     except Exception:
         return render_template('auth_required.html'), 401
 @app.route('/')
-def index():
+def root():
     if app.config['TESTING']:
         return redirect(url_for('notice.news'))  # 테스트 환경에서는 바로 이동
     try:
@@ -38,6 +38,11 @@ def index():
         return redirect(url_for('notice.news'))
     except Exception:
         return render_template('auth_required.html'), 401
+    
+# @app.route('/')
+# def root():
+#     logger.info("Accessing / route")
+#     return redirect(url_for('notice'))
 
 @app.before_request
 def before_request():
