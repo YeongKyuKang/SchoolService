@@ -6,7 +6,7 @@ from models import db
 from routes import festival as festival_blueprint
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/festival/static')
 env = os.environ.get('FLASK_ENV')
 
 if env == 'testing':

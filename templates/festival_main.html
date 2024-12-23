@@ -111,9 +111,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const isReserved = festival.is_reserved;
             const isFull = festival.is_full;
             const imageIndex = (startIndex + index) % festivalServiceImages.length;
-            const imageSrc = `/static/images/${festivalServiceImages[imageIndex]}`;
+            const imageSrc = `/festival/static/images/${festivalServiceImages[imageIndex]}`;
             festivalElement.innerHTML = `
-                 <img src="${imageSrc}" alt="${festival.title}" onerror="this.src='/static/images/default.jpg';">
+                 <img src="${imageSrc}" alt="${festival.title}" onerror="this.src='/festival/static/images/default.jpg';">
                 <h3>${festival.title}</h3>
                 <p>날짜: ${new Date(festival.date).toLocaleDateString()}</p>
                 <p>좌석현황: ${festival.capacity}/${festival.total_seats}</p>  
