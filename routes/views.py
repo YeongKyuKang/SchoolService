@@ -100,10 +100,9 @@ def apply(festival_key):
     is_reserved = reservation is not None and reservation.status == 'Reserved'
     
     logger.info(f"User {user_id} reservation status for festival {festival_key}: {'Reserved' if is_reserved else 'Not Reserved'}")
-    logger.info(f"Total reserved seats for festival {festival_key}: {len(reserved_seats)}")
 
     reserved_seats = [r.seat_number for r in Reservation.query.filter_by(festival_key=festival_key, status='Reserved').all()]
-    
+    logger.info(f"Total reserved seats for festival {festival_key}: {len(reserved_seats)}")
     image = request.args.get('image', 'default.jpg')
     logger.info(f"Rendering apply page for festival: {festival_key}")
     return render_template('festival_apply.html', 
