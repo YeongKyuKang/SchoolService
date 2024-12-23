@@ -35,7 +35,7 @@ class TestNoticeService(unittest.TestCase):
         self.assertTrue('/notice/news' in response.location)
 
     def test_news_page(self):
-        response = self.app.get('/news')
+        response = self.app.get('/notice/news')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'University Notices', response.data)
 
