@@ -88,7 +88,7 @@ def root():
                            reserved_festival_keys=reserved_festival_keys,
                            user_reserved_festivals=user_reserved_festivals)
 
-@festival.route('/festival')
+@festival.route('/festival/dashboard')
 @jwt_req_custom
 def home():
     logger.info("Accessing home page")
