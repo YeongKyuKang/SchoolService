@@ -7,7 +7,7 @@ from models import db, User
 from datetime import timedelta
 from urllib.parse import urlparse
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 app.config.from_object(Config)
 
 db.init_app(app)
