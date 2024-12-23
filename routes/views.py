@@ -101,7 +101,7 @@ def home():
     logger.info(f"Fetching festivals for page {page}")
     logger.info(f"Found {len(festivals.items)} festivals for current page")
     logger.info(f"User {user_id} has {len(reserved_festival_keys)} reserved festivals")
-    logger.info(f"User {user_id} has {len(user_reserved_festivals)} active reservations")
+    
     user_reserved_festivals = db.session.query(
         Festival,
         Reservation.id.label('reservation_id'),
@@ -121,7 +121,7 @@ def home():
             'reservation_time': res.reservation_time
         } for res in user_reserved_festivals
     ]
-
+    logger.info(f"User {user_id} has {len(user_reserved_festivals)} active reservations")
     festivals_data = []
     for festival in festivals.items:
         festival_dict = festival.to_dict()
