@@ -7,7 +7,7 @@ from routes import main as main_blueprint
 from models import db
 import logging
 
-app = Flask(__name__, static_url_path='/main/static')
+app = Flask(__name__)
 app.config.from_object(Config)
 # JWT 설정
 jwt = JWTManager(app)
