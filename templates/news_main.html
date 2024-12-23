@@ -22,25 +22,6 @@
 {% endblock %}
 
 {% block content %}
-<section class="notice-list">
-    <h2 class="section-title">공지사항</h2>
-    <div class="grid notice-grid" id="notice-list">
-        {% for notice in notices %}
-        <div class="notice-item notice-grid-item">
-            <p class="notice-content">{{ notice.content|truncate(100) }}</p>
-            <p class="notice-date">{{ notice.date.strftime('%Y-%m-%d') }}</p>
-        </div>
-        {% endfor %}
-    </div>
-    <div class="pagination">
-        <a href="#" id="prevPage">&lt;</a>
-        <span id="currentPage">1</span>
-        <a href="#" id="nextPage">&gt;</a>
-    </div>
-</section>
-{% endblock %}
-
-{% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         let currentPage = 1;
@@ -115,5 +96,24 @@
     });
 
 </script>
+<section class="notice-list">
+    <h2 class="section-title">공지사항</h2>
+    <div class="grid notice-grid" id="notice-list">
+        {% for notice in notices %}
+        <div class="notice-item notice-grid-item">
+            <p class="notice-content">{{ notice.content|truncate(100) }}</p>
+            <p class="notice-date">{{ notice.date.strftime('%Y-%m-%d') }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="pagination">
+        <a href="#" id="prevPage">&lt;</a>
+        <span id="currentPage">1</span>
+        <a href="#" id="nextPage">&gt;</a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
 {% endblock %}
 
