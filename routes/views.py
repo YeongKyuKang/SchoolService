@@ -233,14 +233,7 @@ def get_festivals():
     return jsonify({"success": True, "festivals": festivals_data})
 
 @festival.route('/login')
-@jwt_req_custom
 def login():
-    logger.info("Redirecting to login page")
-    return redirect("http://kangyk.com/login")
-
-@festival.route('/logout')
-def logout():
-   logger.info("User logging out")
    response = make_response(redirect('http://kangyk.com/login'))
    unset_jwt_cookies(response)
    return response
