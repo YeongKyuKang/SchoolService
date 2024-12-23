@@ -32,7 +32,7 @@ def index():
         logger.error(f"JWT verification failed: {str(e)}")
         return render_template('auth_required.html'), 401
     
-@app.route('/')
+@app.route('/dashboard')
 def home():
     return redirect(url_for('main'))
     
