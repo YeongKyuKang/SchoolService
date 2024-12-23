@@ -313,16 +313,11 @@ def news():
     logger.info('Redirecting to news page')
     return redirect('http://kangyk.com/notice')
 
-@course.route('/logout')
+@course.route('/login')
 @jwt_req_custom
-def logout():
+def login():
     logger.info('User logging out')
     response = make_response(redirect('http://kangyk.com/login'))
     unset_jwt_cookies(response)
     return response
-
-@course.route('/login')
-def login():
-    logger.info('Redirecting to login page')
-    return redirect('http://kangyk.com/login')
 
