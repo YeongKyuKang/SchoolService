@@ -18,17 +18,8 @@ app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_COOKIE_SECURE'] = False  # 개발 환경에서는 False, 프로덕션에서는 True로 설정
 app.config['JWT_COOKIE_SAMESITE'] = 'Lax'  # 개발 환경에서는 'Lax', 프로덕션에서는 'Strict'로 설정
 
-app.register_blueprint(notice_blueprint)
+app.register_blueprint(notice_blueprint, url_prefix='/notice')
 
-@app.route('/notice')
-def index():
-    if app.config['TESTING']:
-        return redirect(url_for('notice.news'))  # 테스트 환경에서는 바로 이동
-    try:
-        verify_jwt_in_request()
-        return redirect(url_for('notice.news'))
-    except Exception:
-        return render_template('auth_required.html'), 401
 @app.route('/')
 def root():
     if app.config['TESTING']:
