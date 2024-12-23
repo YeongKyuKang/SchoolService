@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: notice-service-container
+  name: festival-service-container
   namespace: default
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: notice-service
+      app: festival-service
   template:
     metadata:
       labels:
-        app: notice-service
+        app: festival-service
     spec:
       containers:
-      - name: notice-service-container
-        image: ghcr.io/yeongkyukang/notice_service:latest
+      - name: festival-service-container
+        image: ghcr.io/yeongkyukang/festival_service:latest
         env:
           - name: JWT_SECRET_KEY
             valueFrom:
@@ -31,8 +31,8 @@ spec:
           - name: DB_PORT
             value: "3306"
           - name: DB_NAME
-            value: notice_db
+            value: festival_db
         ports:
-          - containerPort: 5003
+          - containerPort: 5002
       imagePullSecrets:
       - name: ghcr-secret
