@@ -257,7 +257,7 @@ def news():
     logger.info("Redirecting to notice page")
     return redirect("http://kangyk.com/notice")
 
-@festival.route('/course')
+@festival.route('/course_registration')
 
 def course():
     logger.info("Redirecting to course registration page")
