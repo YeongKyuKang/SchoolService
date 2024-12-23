@@ -30,24 +30,25 @@ def jwt_required_custom(fn):
 @jwt_required_custom
 def index():
     logger.info("Entering index function")
-    try:
-        if current_app.config.get('TESTING', False):
-            logger.debug("Testing mode detected, returning test data")
-            return render_template('index.html', username='Test User', festivals=[], applied_courses=[])
+    return render_template('index.html')
+    #try:
+    #    if current_app.config.get('TESTING', False):
+    #        logger.debug("Testing mode detected, returning test data")
+    #        return render_template('index.html', username='Test User', festivals=[], applied_courses=[])
 
 #        current_user_id = get_jwt_identity()
 #        logger.debug(f"Current user ID: {current_user_id}")
 #        student = Student.query.filter_by(id=current_user_id).first()
 #        logger.info(f"Retrieved student: {student}")
 
-        logger.debug("QQQQQQQQQQQQQQQQuerying festivalsQQQQQQQQQQQQQQQ")
+#        logger.debug("QQQQQQQQQQQQQQQQuerying festivalsQQQQQQQQQQQQQQQ")
 #        festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
 #                            .order_by(desc(Festival.capacity))\
 #                            .limit(9)\
 #                            .all()
 #        logger.info(f"Retrieved {len(festivals)} festivals")
 
-        logger.debug("QQQQQQQQQQQQQQQQQuerying applied coursesQQQQQQQQQQQQQQQQQQQQQQQQ")
+#        logger.debug("QQQQQQQQQQQQQQQQQuerying applied coursesQQQQQQQQQQQQQQQQQQQQQQQQ")
 #        applied_courses = db.session.query(Course).join(Registration).filter(
 #            Registration.student_id == student.student_id,
 #            Registration.status == 'Applied'
@@ -61,15 +62,14 @@ def index():
 #            'department': course.department,
 #            'year': course.year
 #        } for course in applied_courses]
-        logger.debug("Rendering index template")
-        return render_template('index.html'
+#        logger.debug("Rendering index template")
+        
 #                               username=student.name if student else 'User',
 #                               festivals=festivals,
 #                               applied_courses=applied_courses_data)
-        )
-    except Exception as e:
-        logger.error(f"Error in index function: {str(e)}", exc_info=True)
-        return "Internal Server Error", 500
+    #except Exception as e:
+    #    logger.error(f"Error in index function: {str(e)}", exc_info=True)
+    #    return "Internal Server Error", 500
 
 @main.route('/festival/festivals')
 @jwt_required_custom
