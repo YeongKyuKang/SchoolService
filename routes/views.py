@@ -50,6 +50,10 @@ def course_registration():
     except Exception as e:
         logger.error(f"수강 신청을 위한 JWT 검증 실패: {str(e)}")
         return render_template('auth_required.html'), 401
+    
+@course.route('/')
+def home():
+    return redirect(url_for('course_registration'))
 
 @course.route('/course_registration/get_courses', methods=['GET'])
 @jwt_req_custom
