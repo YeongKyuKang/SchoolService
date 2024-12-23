@@ -26,14 +26,14 @@ def jwt_required_custom(fn):
             return jsonify({"error": "로그인이 필요한 서비스입니다.", "redirect": url_for('main.login', _external=True)}), 401
     return wrapper
 
-@main.route('/dashboard')
+@main.route('/main/dashboard')
 @jwt_required_custom
 def index():
     logger.info("Entering index function")
     try:
-#        if current_app.config.get('TESTING', False):
-#            logger.debug("Testing mode detected, returning test data")
-#            return render_template('index.html', username='Test User', festivals=[], applied_courses=[])
+        if current_app.config.get('TESTING', False):
+            logger.debug("Testing mode detected, returning test data")
+            return render_template('index.html', username='Test User', festivals=[], applied_courses=[])
 
         current_user_id = get_jwt_identity()
         logger.debug(f"Current user ID: {current_user_id}")

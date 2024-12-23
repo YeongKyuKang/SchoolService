@@ -32,9 +32,17 @@ def index():
         logger.error(f"JWT verification failed: {str(e)}")
         return render_template('auth_required.html'), 401
     
-@app.route('/dashboard')
-def home():
-    return redirect(url_for('main'))
+@app.route('/')
+def index():
+    logger.info("Accessing /main route")
+    try:
+        logger.debug("Verifying JWT in request")
+        verify_jwt_in_request()
+        logger.info("JWT verified, redirecting to main.index")      
+        return redirect(url_for('main.index'))
+    except Exception as e:
+        logger.error(f"JWT verification failed: {str(e)}")
+        return render_template('auth_required.html'), 401
     
 
 @app.before_request
