@@ -29,6 +29,9 @@ def index():
         return redirect(url_for('notice.news'))
     except Exception:
         return render_template('auth_required.html'), 401
+@app.route('/')
+def home():
+    return redirect(url_for('notice'))
 
 @app.before_request
 def before_request():
