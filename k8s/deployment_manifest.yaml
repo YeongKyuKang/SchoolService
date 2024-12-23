@@ -24,8 +24,6 @@ spec:
             value: root
           - name: DB_PASSWORD
             value: mysql
-          - name: DB_NAME
-            value: user_db
         ports:
           - containerPort: 5003
       imagePullSecrets:
