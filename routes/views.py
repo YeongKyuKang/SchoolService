@@ -38,16 +38,12 @@ def festival():
 def course():
     return redirect('http://kangyk.com/course_registration')
 
-@notice.route('/logout')
+@notice.route('/login')
 @jwt_optional
-def logout():
+def login():
     response = make_response(redirect('http://kangyk.com/login'))
     unset_jwt_cookies(response)
     return response
-
-@notice.route('/login')
-def login():
-    return redirect('http://kangyk.com/login')
 
 @notice.route('/notice/api/notices')
 def get_notices():
