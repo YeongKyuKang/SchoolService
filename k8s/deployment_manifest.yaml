@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: main-service-container
+  namespace: default
 spec:
   replicas: 3
   selector:
@@ -14,17 +15,24 @@ spec:
     spec:
       containers:
       - name: main-service-container
-        image: ghcr.io/yeongkyukang/main_service:latest # 기본값 설정
+        image: ghcr.io/yeongkyukang/main_service:latest
         env:
+          - name: JWT_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: jwt-secret
+                key: JWT_SECRET_KEY
+          - name: DB_USER
+            value: admin
+          - name: DB_PASSWORD
+            value: "P*ssword123"
           - name: DB_HOST
-            value: mysql-service.default  # MySQL 서비스 이름
+            value: "121.160.41.222"
           - name: DB_PORT
             value: "3306"
-          - name: DB_USER
-            value: root
-          - name: DB_PASSWORD
-            value: mysql
+          - name: DB_NAME
+            value: course_db
         ports:
-          - containerPort: 5003
+          - containerPort: 5000
       imagePullSecrets:
       - name: ghcr-secret
