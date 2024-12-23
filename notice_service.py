@@ -18,7 +18,7 @@ app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_COOKIE_SECURE'] = False  # 개발 환경에서는 False, 프로덕션에서는 True로 설정
 app.config['JWT_COOKIE_SAMESITE'] = 'Lax'  # 개발 환경에서는 'Lax', 프로덕션에서는 'Strict'로 설정
 
-app.register_blueprint(notice_blueprint, url_prefix='/notice')
+app.register_blueprint(notice_blueprint)
 @app.route('/notice')
 def home():
     if app.config['TESTING']:
