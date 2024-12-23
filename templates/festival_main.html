@@ -326,8 +326,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-</script>
-<script>
   const festivalsData = JSON.parse('{{ festivals|tojson|safe }}');
   const reservedFestivalKeys = JSON.parse('{{ reserved_festival_keys|tojson|safe }}');
   const userReservedFestivals = JSON.parse('{{ user_reserved_festivals|tojson|safe }}');
