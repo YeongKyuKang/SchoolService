@@ -33,7 +33,7 @@ def index():
         return render_template('auth_required.html'), 401
     
 @app.route('/')
-def index():
+def root():
     logger.info("Accessing /main route")
     try:
         logger.debug("Verifying JWT in request")
@@ -44,6 +44,10 @@ def index():
         logger.error(f"JWT verification failed: {str(e)}")
         return render_template('auth_required.html'), 401
     
+# @app.route('/')
+# def root():
+#     logger.info("Accessing / route")
+#     return redirect(url_for('main'))
 
 @app.before_request
 def before_request():
