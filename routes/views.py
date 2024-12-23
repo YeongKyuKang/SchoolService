@@ -112,8 +112,8 @@ def course_registration():
     logger.debug("Redirecting to course registration page")
     return redirect('http://kangyk.com/course_registration')
 
-@main.route('/logout')
-def logout():
+@main.route('/login')
+def login():
     logger.info("Entering logout function")
     if current_app.config.get('TESTING', False):
         logger.debug("Testing mode detected, redirecting to main page")
@@ -123,10 +123,4 @@ def logout():
     unset_jwt_cookies(response)
     logger.info("User logged out successfully")
     return response
-
-@main.route('/login')
-def login():
-    logger.info("Entering main function")
-    logger.debug("Redirecting to login page")
-    return redirect('http://kangyk.com/login')
 
