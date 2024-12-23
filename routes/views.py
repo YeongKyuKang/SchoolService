@@ -5,6 +5,7 @@ from . import main
 from models import db, Course, Registration, Student, Festival
 from sqlalchemy import desc
 import logging
+from .festival_service_api import FestivalServiceAPI
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -78,15 +79,17 @@ def api_festivals():
         if current_app.config.get('TESTING', False):
             logger.debug("Testing mode detected, returning test data")
             return jsonify({"success": True, "festivals": [{"name": "Test Festival", "capacity": 100, "total_seats": 10}]})
-        logger.debug("Querying festivals")
-        festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
-                            .order_by(desc(Festival.capacity))\
-                            .limit(9)\
-                            .all()
-        logger.info(f"Retrieved {len(festivals)} festivals")
-        festivals_data = [festival.to_dict() for festival in festivals]
-        logger.debug("Returning festivals data")
-        return jsonify({"success": True, "festivals": festivals_data})
+        
+        # Use FestivalServiceAPI to fetch festivals
+        festival_service = FestivalServiceAPI()
+        result = festival_service.get_festivals()
+        
+        if result['success']:
+            logger.info(f"Retrieved {len(result['festivals'])} festivals")
+            return jsonify(result)
+        else:
+            logger.error(f"Error fetching festivals: {result['error']}")
+            return jsonify({"success": False, "error": result['error']}), 500
     except Exception as e:
         logger.error(f"Error in api_festivals function: {str(e)}", exc_info=True)
         return jsonify({"success": False, "error": "An unexpected error occurred"}), 500
@@ -126,3 +129,4 @@ def login():
     logger.info("Entering main function")
     logger.debug("Redirecting to login page")
     return redirect('http://kangyk.com/login')
+
