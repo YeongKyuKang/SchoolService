@@ -21,19 +21,8 @@ db.init_app(app)
 app.register_blueprint(main_blueprint)
 
 @app.route('/main')
-def index():
-    logger.info("Accessing /main route")
-    try:
-        logger.debug("Verifying JWT in request")
-        verify_jwt_in_request()
-        logger.info("JWT verified, redirecting to main.index")      
-        return redirect(url_for('main.index'))
-    except Exception as e:
-        logger.error(f"JWT verification failed: {str(e)}")
-        return render_template('auth_required.html'), 401
-    
 @app.route('/')
-def root():
+def index():
     logger.info("Accessing /main route")
     try:
         logger.debug("Verifying JWT in request")
