@@ -36,9 +36,15 @@ def get_current_user_id():
     return get_jwt_identity()
 #JWT_REQUIRED와 verify_jwt_in_request를 사용해야한다던 오류는 패키지 버전을 전부 업그레이드해서
 #최신화 하는 것으로 해결
+
+# @app.route('/')
+# def root():
+#     logger.info("Accessing / route")
+#     return redirect(url_for('festival'))
+
 @festival.route('/')
 @jwt_req_custom
-def home():
+def root():
     logger.info("Accessing home page")
     page = request.args.get('page', 1, type=int)
     per_page = 10
