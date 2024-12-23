@@ -23,16 +23,16 @@ spec:
                 name: jwt-secret
                 key: JWT_SECRET_KEY
           - name: DB_USER
-            value: root
+            value: admin
           - name: DB_PASSWORD
-            value: mysql
+            value: "P*ssword123"
           - name: DB_HOST
-            value: mysql-service.default
+            value: "121.160.41.222"
           - name: DB_PORT
             value: "3306"
           - name: DB_NAME
             value: course_db
         ports:
-          - containerPort: 5001
+          - containerPort: 5004
       imagePullSecrets:
       - name: ghcr-secret
