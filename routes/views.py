@@ -37,58 +37,12 @@ def get_current_user_id():
 #JWT_REQUIRED와 verify_jwt_in_request를 사용해야한다던 오류는 패키지 버전을 전부 업그레이드해서
 #최신화 하는 것으로 해결
 
-# @app.route('/')
-# def root():
-#     logger.info("Accessing / route")
-#     return redirect(url_for('festival'))
-
-@festival.route('/')
-@jwt_req_custom
+@app.route('/')
 def root():
-    logger.info("Accessing home page")
-    page = request.args.get('page', 1, type=int)
-    per_page = 10
-    user_id = get_current_user_id()
+    logger.info("Accessing / route")
+    return redirect(url_for('festival'))
 
-    festivals = Festival.query.order_by(Festival.date).paginate(page=page, per_page=per_page, error_out=False)
-    reserved_festival_keys = [r.festival_key for r in Reservation.query.filter_by(user_id=user_id, status='Reserved').all()]
-    logger.info(f"Fetching festivals for page {page}")
-    logger.info(f"Found {len(festivals.items)} festivals for current page")
-    logger.info(f"User {user_id} has {len(reserved_festival_keys)} reserved festivals")
-    logger.info(f"User {user_id} has {len(user_reserved_festivals)} active reservations")
-    user_reserved_festivals = db.session.query(
-        Festival,
-        Reservation.id.label('reservation_id'),
-        Reservation.seat_number,
-        Reservation.status,
-        Reservation.reservation_time
-    ).join(Reservation, Festival.festival_key == Reservation.festival_key
-    ).filter(Reservation.user_id == user_id, Reservation.status == 'Reserved').all()
-
-    user_reserved_festivals = [
-        {
-            'id': res.reservation_id,
-            'festival_key': res.Festival.festival_key,
-            'title': res.Festival.title,
-            'seat_number': res.seat_number,
-            'status': res.status,
-            'reservation_time': res.reservation_time
-        } for res in user_reserved_festivals
-    ]
-
-    festivals_data = []
-    for festival in festivals.items:
-        festival_dict = festival.to_dict()
-        festival_dict['is_reserved'] = festival.festival_key in reserved_festival_keys
-        festival_dict['is_full'] = festival.capacity >= festival.total_seats
-        festivals_data.append(festival_dict)
-    logger.info(f"Rendering home page with {len(festivals_data)} festivals")
-    return render_template('festival_main.html', 
-                           festivals=festivals_data,
-                           reserved_festival_keys=reserved_festival_keys,
-                           user_reserved_festivals=user_reserved_festivals)
-
-@festival.route('/festival/dashboard')
+@festival.route('/festival')
 @jwt_req_custom
 def home():
     logger.info("Accessing home page")
