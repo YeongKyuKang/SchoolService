@@ -41,12 +41,12 @@ def index():
         student = Student.query.filter_by(id=current_user_id).first()
         logger.info(f"Retrieved student: {student}")
 
-        logger.debug("QQQQQQQQQQQQQQQQuerying festivalsQQQQQQQQQQQQQQQ")
-        festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
-                            .order_by(desc(Festival.capacity))\
-                            .limit(9)\
-                            .all()
-        logger.info(f"Retrieved {len(festivals)} festivals")
+    #     logger.debug("QQQQQQQQQQQQQQQQuerying festivalsQQQQQQQQQQQQQQQ")
+    #     festivals = Festival.query.filter(Festival.capacity != Festival.total_seats)\
+    #                         .order_by(desc(Festival.capacity))\
+    #                         .limit(9)\
+    #                         .all()
+    #     logger.info(f"Retrieved {len(festivals)} festivals")
 
         logger.debug("QQQQQQQQQQQQQQQQQuerying applied coursesQQQQQQQQQQQQQQQQQQQQQQQQ")
         applied_courses = db.session.query(Course).join(Registration).filter(
@@ -65,7 +65,6 @@ def index():
         logger.debug("Rendering index template")
         return render_template('index.html', 
                                username=student.name if student else 'User',
-                               festivals=festivals,
                                applied_courses=applied_courses_data)
     except Exception as e:
         logger.error(f"Error in index function: {str(e)}", exc_info=True)
