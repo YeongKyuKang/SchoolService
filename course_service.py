@@ -8,7 +8,7 @@ from routes import course as course_blueprint
 import os
 import logging
 
-app = Flask(__name__, static_url_path='/course/static')
+app = Flask(__name__)
 env = os.environ.get('FLASK_ENV')
 
 logging.basicConfig(
