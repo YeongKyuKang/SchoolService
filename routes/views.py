@@ -35,7 +35,7 @@ def redirect_to_main():
 def redirect_to_festival():
     return redirect('http://kangyk.com/festival')
 
-@notice.route('/course')
+@notice.route('/course_registration')
 def redirect_to_course():
     return redirect('http://kangyk.com/course_registration')
 
