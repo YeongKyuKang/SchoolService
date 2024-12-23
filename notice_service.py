@@ -22,26 +22,15 @@ app.register_blueprint(notice_blueprint, url_prefix='/notice')
 @app.route('/notice')
 def home():
     if app.config['TESTING']:
-        return redirect(url_for('notice.news'))  # 테스트 환경에서는 바로 이동
+        return redirect(url_for('notice.index'))  # 테스트 환경에서는 바로 이동
     try:
         verify_jwt_in_request()
-        return redirect(url_for('notice.news'))
+        return redirect(url_for('notice.index'))
     except Exception:
         return render_template('auth_required.html'), 401
 @app.route('/')
 def root():
-    if app.config['TESTING']:
-        return redirect(url_for('notice.news'))  # 테스트 환경에서는 바로 이동
-    try:
-        verify_jwt_in_request()
-        return redirect(url_for('notice.news'))
-    except Exception:
-        return render_template('auth_required.html'), 401
-    
-# @app.route('/')
-# def root():
-#     logger.info("Accessing / route")
-#     return redirect(url_for('notice'))
+    return redirect(url_for('notice'))
 
 @app.before_request
 def before_request():
