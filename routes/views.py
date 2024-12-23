@@ -18,8 +18,7 @@ def jwt_optional(f):
 @notice.route('/notice/news')
 @jwt_optional
 def index():
-    notices = Notice.query.order_by(Notice.date.desc()).all()
-    return render_template('news_main.html', notices=notices)
+    return render_template('news_main.html')
 
 @notice.route('/notice/news/<int:notice_id>')
 @jwt_optional
