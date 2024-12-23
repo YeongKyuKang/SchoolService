@@ -31,6 +31,11 @@ def index():
     except Exception as e:
         logger.error(f"JWT verification failed: {str(e)}")
         return render_template('auth_required.html'), 401
+    
+@app.route('/')
+def home():
+    return redirect(url_for('main'))
+    
 
 @app.before_request
 def before_request():
