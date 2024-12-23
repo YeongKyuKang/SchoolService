@@ -15,7 +15,7 @@ def jwt_optional(f):
         return f(*args, **kwargs)
     return wrapper
 
-@notice.route('/notice/news')
+@notice.route('/news')
 @jwt_optional
 def news():
     notices = Notice.query.order_by(Notice.date.desc()).all()
