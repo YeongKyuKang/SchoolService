@@ -86,8 +86,9 @@ def registers():
 
 @app.route('/register', methods=['GET', 'POST'])
 def signup():
+    logger.info(f"Request URL: {request.url}")
     logger.info("Signup route accessed")
-    
+    logger.info(f"Request method: {request.method}")
     if request.method == 'POST':
         logger.info("POST request received for signup")
         data = request.form
@@ -109,6 +110,7 @@ def signup():
 
         # MySQL 데이터베이스 연결 및 대조
         try:
+            logger.info(f"Request method: {request.method}")
             logger.info("Connecting to source database for user verification")
             connection = pymysql.connect(**DB_CONFIG_SOURCE)
             cursor = connection.cursor(pymysql.cursors.DictCursor)
@@ -137,6 +139,7 @@ def signup():
 
         # MySQL 대상 데이터베이스에 회원 정보 저장
         try:
+            logger.info(f"Request method: {request.method}")
             logger.info("Connecting to destination database for user registration")
             connection = pymysql.connect(**DB_CONFIG_DEST)
             cursor = connection.cursor()
