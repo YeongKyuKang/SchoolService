@@ -8,7 +8,7 @@ spec:
     - list:
         elements:
           - name: main-service-appset
-            repoURL: 'git@github.com:YeongKyuKang/main-service.git'
+            repoURL: 'git@github.com:YeongKyuKang/SchoolService.git'
             targetRevision: MainService
             path: 'k8s'
   template:
