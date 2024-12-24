@@ -80,9 +80,10 @@ def home():
 def register():
     return render_template('register.html')
 
-@app.route('/signup', methods=['POST'])
+@app.route('/login/signup', methods=['GET', 'POST'])
 def signup():
     # 요청 데이터 가져오기
+
     data = request.form
 
     # 필수 데이터 검증
