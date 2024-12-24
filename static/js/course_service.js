@@ -15,10 +15,10 @@ async function fetchCourseData() {
         const data = await response.json();
         courses = data.courses || [];
         appliedCourses = data.appliedCourses || [];
-        keptCourses = data.keptCourses || [];
+        
         console.log('Available Courses:', courses);
         console.log('Applied Courses:', appliedCourses);
-        console.log('Kept Courses:', keptCourses);
+        
         showInitialMessage();  // 초기 메시지 표시
         updateAppliedCourses();
         
@@ -79,7 +79,7 @@ function createCourseList(coursesToDisplay) {
     if (coursesToDisplay.length === 0) {
         courseTableBody.innerHTML = `
             <tr>
-                <td colspan="10" style="height: 240px; text-align: center; color: rgba(128, 128, 128, 0.7);">
+                <td colspan="9" style="height: 240px; text-align: center; color: rgba(128, 128, 128, 0.7);">
                     조회된 강좌가 없습니다.
                 </td>
             </tr>
@@ -370,7 +370,7 @@ function showInitialMessage() {
     if (courseTableBody) {
         courseTableBody.innerHTML = `
             <tr>
-                <td colspan="10" style="height: 240px; text-align: center; color: rgba(128, 128, 128, 0.7);">
+                <td colspan="9" style="height: 240px; text-align: center; color: rgba(128, 128, 128, 0.7);">
                     원하는 과목을 검색하세요
                 </td>
             </tr>
@@ -384,7 +384,7 @@ function showNoCoursesMessage() {
     if (courseTableBody) {
         courseTableBody.innerHTML = `
             <tr>
-                <td colspan="10" style="height: 240px; text-align: center; color: rgba(128, 128, 128, 0.7);">
+                <td colspan="9" style="height: 240px; text-align: center; color: rgba(128, 128, 128, 0.7);">
                     조회된 강좌가 없습니다.
                 </td>
             </tr>
