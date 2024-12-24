@@ -83,7 +83,7 @@ def register():
 @app.route('/signup', methods=['POST'])
 def signup():
     # 요청 데이터 가져오기
-    data = request.json
+    data = request.form
 
     # 필수 데이터 검증
     required_fields = ['student_id', 'email', 'password', 'department', 'name', 'phone_number']
