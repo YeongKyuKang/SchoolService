@@ -1,15 +1,14 @@
 <header>
-    <ul class="nav-menu">
-        <div class="logo">University Services</div>
-        <ul class="nav-menu">
-            <li><a href="{{ url_for('course.main') }}">Home</a></li>
-            <li><a href="{{ url_for('course.festival') }}">Festival</a></li>
-            <li><a href="{{ url_for('course.news') }}">News</a></li>
-            <li><a href="{{ url_for('course.course_registration') }}">Course registration</a></li>
-            <li>
-                <a href="{{ url_for('course.login') }}" class="logout-btn">Logout</a>
-            </li>
-        </ul>
+    <nav>
+      <div class="logo">University Services</div>
+      <ul class="nav-menu">
+        <li><a href="{{ url_for('course.main') }}">Home</a></li>
+        <li><a href="{{ url_for('course.festival') }}">Festival</a></li>
+        <li><a href="{{ url_for('course.news') }}">News</a></li>
+        <li><a href="{{ url_for('course.course_registration') }}">Course registration</a></li>
+        <li>
+          <a href="{{ url_for('course.login') }}" class="logout-btn" id="logoutBtn">Logout</a>
+        </li>
+      </ul>
     </nav>
-</header>
-
+  </header>
