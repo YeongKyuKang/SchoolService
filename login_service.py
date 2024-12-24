@@ -8,11 +8,15 @@ from datetime import timedelta
 from urllib.parse import urlparse
 import pymysql
 from bcrypt import hashpw, gensalt
+import logging
 
 app = Flask(__name__, static_url_path='/static')
 app.config.from_object(Config)
 db.init_app(app)
 jwt = JWTManager(app)
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 # MySQL DB 접속 정보 (대조용)
@@ -82,14 +86,18 @@ def registers():
 
 @app.route('/register', methods=['GET', 'POST'])
 def signup():
-    # 요청 데이터 가져오기
+    logger.info("Signup route accessed")
+    
     if request.method == 'POST':
+        logger.info("POST request received for signup")
         data = request.form
+        logger.debug(f"Received data: {data}")
 
         # 필수 데이터 검증
         required_fields = ['student_id', 'email', 'password', 'department', 'name', 'phone_number']
         for field in required_fields:
             if not data.get(field):
+                logger.warning(f"Missing required field: {field}")
                 return jsonify({'error': f'Missing required field: {field}'}), 400
 
         student_id = data['student_id']
@@ -101,10 +109,10 @@ def signup():
 
         # MySQL 데이터베이스 연결 및 대조
         try:
+            logger.info("Connecting to source database for user verification")
             connection = pymysql.connect(**DB_CONFIG_SOURCE)
             cursor = connection.cursor(pymysql.cursors.DictCursor)
 
-            # `student_info` 테이블에서 이메일과 학번으로만 대조
             query = """
                 SELECT * 
                 FROM student_info 
@@ -115,8 +123,11 @@ def signup():
             result = cursor.fetchone()
 
             if not result:
+                logger.warning(f"User information not found for email: {email} and student_id: {student_id}")
                 return jsonify({'error': 'User information does not match any record in student_info database'}), 400
+            logger.info("User information verified successfully")
         except pymysql.MySQLError as e:
+            logger.error(f"Database error during user verification: {str(e)}")
             return jsonify({'error': f'Database error: {str(e)}'}), 500
         finally:
             if 'cursor' in locals():
@@ -126,13 +137,16 @@ def signup():
 
         # MySQL 대상 데이터베이스에 회원 정보 저장
         try:
+            logger.info("Connecting to destination database for user registration")
             connection = pymysql.connect(**DB_CONFIG_DEST)
             cursor = connection.cursor()
             
             if User.query.filter_by(student_id=student_id).first():
+                logger.warning(f"Attempt to register with existing student_id: {student_id}")
                 return jsonify({"success": False, "message": "이미 등록된 학번입니다."}), 400
 
             if User.query.filter_by(email=email).first():
+                logger.warning(f"Attempt to register with existing email: {email}")
                 return jsonify({"success": False, "message": "이미 등록된 이메일입니다."}), 400
 
             # 비밀번호 해싱
@@ -145,7 +159,9 @@ def signup():
             """
             cursor.execute(insert_query, (student_id, email, department, name, phone_number, password_hash))
             connection.commit()
+            logger.info(f"User registered successfully: {email}")
         except pymysql.MySQLError as e:
+            logger.error(f"Database error during user registration: {str(e)}")
             return jsonify({'error': f'Failed to save user information: {str(e)}'}), 500
         finally:
             if 'cursor' in locals():
@@ -154,7 +170,11 @@ def signup():
                 connection.close()
 
         # 회원가입 성공 메시지 반환
-    return jsonify({'message': 'Sign up successful! Your information has been saved.'}), 200
+        logger.info("Signup process completed successfully")
+        return jsonify({'message': 'Sign up successful! Your information has been saved.'}), 200
+    
+    logger.info("GET request received for signup page")
+    return render_template('register.html')  # GET 요청 시 회원가입 페이지 렌더링
 
 @app.errorhandler(400)
 def bad_request(error):
