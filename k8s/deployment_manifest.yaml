@@ -22,14 +22,21 @@ spec:
               secretKeyRef:
                 name: jwt-secret
                 key: JWT_SECRET_KEY
+          
+          - name: DB_WRITE_HOST
+            value: "121.160.41.222"
+          - name: DB_WRITE_PORT
+            value: "3306"
+
+          - name: DB_READ_HOSTS
+            value: "rds-s1.c9ywksucaj8v.ap-northeast-2.rds.amazonaws.com,rds-s2.c9ywksucaj8v.ap-northeast-2.rds.amazonaws.com"
+          - name: DB_READ_PORT
+            value: "3306"
+
           - name: DB_USER
             value: admin
           - name: DB_PASSWORD
             value: "P*ssword123"
-          - name: DB_HOST
-            value: "121.160.41.222"
-          - name: DB_PORT
-            value: "3306"
           - name: DB_NAME
             value: festival_db
         ports:
