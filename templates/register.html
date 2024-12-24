@@ -118,35 +118,34 @@
                     body: formData,
                     credentials: 'include'
                 })
-                .then(response => 
-                    response.json().catch(() => response.text())
-                )
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Server responded with an error');
+                    }
+                    return response.json().catch(() => response.text());
+                })
                 .then(data => {
                     if (typeof data === 'object') {
                         // JSON 응답 처리
                         handleJsonResponse(data);
                     } else {
-                        // HTML 응답 처리
-                        document.body.innerHTML = data;
-                        const errorElement = document.querySelector('.error-message');
-                        if (errorElement) {
-                            alert(errorElement.textContent);
-                        }
+                        // 텍스트 응답 처리
+                        console.log('Received text response:', data);
+                        // 필요한 경우 여기서 alert를 표시할 수 있습니다.
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    // 여기서는 네트워크 오류나 서버 오류만 처리합니다.
                     alert('An error occurred. Please try again.');
                 });
-            });
-        });
         
         function handleJsonResponse(data) {
             if (data.success) {
-               
+                alert(data.message)
                 window.location.href = 'http://kangyk.com/login';
             } else {
-                
+                alert(data.message)
                 window.location.href = 'http://kangyk.com/register';
             }
         }
