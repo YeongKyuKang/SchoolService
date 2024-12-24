@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: login-service-container
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: login-service
+  template:
+    metadata:
+      labels:
+        app: login-service
+    spec:
+      containers:
+      - name: login-service-container
+        image: ghcr.io/yeongkyukang/login_service:latest
+        env:
+          - name: JWT_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: jwt-secret
+                key: JWT_SECRET_KEY
+          
+          - name: DB_WRITE_HOST
+            value: "121.160.41.222"
+          - name: DB_WRITE_PORT
+            value: "3306"
+
+          - name: DB_READ_HOSTS
+            value: "rds-s1.c9ywksucaj8v.ap-northeast-2.rds.amazonaws.com,rds-s2.c9ywksucaj8v.ap-northeast-2.rds.amazonaws.com"
+          - name: DB_READ_PORT
+            value: "3306"
+
+          - name: DB_USER
+            value: admin
+          - name: DB_PASSWORD
+            value: "P*ssword123"
+          - name: DB_NAME
+            value: user_db
+        ports:
+          - containerPort: 5001
+        resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200"
+              memory: "256Mi"
+      imagePullSecrets:
+      - name: ghcr-secret
