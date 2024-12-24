@@ -76,11 +76,11 @@ def login():
 def home():
     return redirect(url_for('login'))
 
-@app.route('/register')
-def register():
+@app.route('/registers')
+def registers():
     return render_template('register.html')
 
-@app.route('/login/signup', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def signup():
     # 요청 데이터 가져오기
     if request.method == 'POST':

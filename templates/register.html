@@ -189,7 +189,7 @@
                 
                 const formData = new FormData(registerForm);
                 
-                fetch('/login/signup', {
+                fetch('/register', {
                     method: 'POST',
                     body: formData,
                     credentials: 'include'
@@ -223,7 +223,7 @@
                 window.location.href = '/login';
             } else {
                 alert(data.message)
-                window.location.href = '/register';
+                window.location.href = '/registers';
             }
         }
     </script>
