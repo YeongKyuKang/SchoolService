@@ -22,17 +22,35 @@ spec:
               secretKeyRef:
                 name: jwt-secret
                 key: JWT_SECRET_KEY
+          
+          - name: DB_WRITE_HOST
+            value: "121.160.41.222"
+          - name: DB_WRITE_PORT
+            value: "3306"
+<<<<<<< HEAD
+            
+=======
+)
+>>>>>>> cb36f0dc9d155ae2c3b51123c70e40e2b6537e0e
+          - name: DB_READ_HOSTS
+            value: "rds-s1.c9ywksucaj8v.ap-northeast-2.rds.amazonaws.com,rds-s2.c9ywksucaj8v.ap-northeast-2.rds.amazonaws.com"
+          - name: DB_READ_PORT
+            value: "3306"
+
           - name: DB_USER
             value: admin
           - name: DB_PASSWORD
             value: "P*ssword123"
-          - name: DB_HOST
-            value: "121.160.41.222"
-          - name: DB_PORT
-            value: "3306"
           - name: DB_NAME
             value: course_db
         ports:
           - containerPort: 5000
+        resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200"
+              memory: "256Mi"
       imagePullSecrets:
       - name: ghcr-secret
