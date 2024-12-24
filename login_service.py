@@ -127,6 +127,12 @@ def signup():
     try:
         connection = pymysql.connect(**DB_CONFIG_DEST)
         cursor = connection.cursor()
+        
+        if User.query.filter_by(student_id=student_id).first():
+            return jsonify({"success": False, "message": "이미 등록된 학번입니다."}), 400
+
+        if User.query.filter_by(email=email).first():
+            return jsonify({"success": False, "message": "이미 등록된 이메일입니다."}), 400
 
         # 비밀번호 해싱
         password_hash = hashpw(password.encode('utf-8'), gensalt()).decode('utf-8')
