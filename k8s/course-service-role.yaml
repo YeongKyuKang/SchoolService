@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: main-service-rbac
+  name: course-service-rbac
 rules:
   - apiGroups: ["autoscaling/v2"]
     resources: ["horizontalpodautoscalers", "nodes/metrics", "pods", "nodes"]
