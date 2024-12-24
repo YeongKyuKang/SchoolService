@@ -76,9 +76,9 @@ def login():
 def home():
     return redirect(url_for('login'))
 
-@app.route('/redirect_to_register')
-def redirect_to_register():
-    return redirect(url_for('register'))
+@app.route('/register')
+def register():
+    return render_template('register.html')
 
 @app.route('/signup', methods=['POST'])
 def signup():
