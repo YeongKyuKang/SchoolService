@@ -84,99 +84,97 @@ def home():
 def registers():
     return render_template('register.html')
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['POST'])
 def signup():
     logger.info("Signup route accessed")
     logger.info(f"Request method: {request.method}")
-    if request.method == 'POST':
-        logger.info("POST request received for signup")
-        data = request.form
-        logger.debug(f"Received data: {data}")
+    request.method == 'POST'
+    logger.info("POST request received for signup")
+    data = request.form
+    logger.debug(f"Received data: {data}")
 
         # 필수 데이터 검증
-        required_fields = ['student_id', 'email', 'password', 'department', 'name', 'phone_number']
-        for field in required_fields:
-            if not data.get(field):
-                logger.warning(f"Missing required field: {field}")
-                return jsonify({'error': f'Missing required field: {field}'}), 400
+    required_fields = ['student_id', 'email', 'password', 'department', 'name', 'phone_number']
+    for field in required_fields:
+        if not data.get(field):
+            logger.warning(f"Missing required field: {field}")
+            return jsonify({'error': f'Missing required field: {field}'}), 400
 
-        student_id = data['student_id']
-        email = data['email']
-        password = data['password']
-        department = data['department']
-        name = data['name']
-        phone_number = data['phone_number']
+    student_id = data['student_id']
+    email = data['email']
+    password = data['password']
+    department = data['department']
+    name = data['name']
+    phone_number = data['phone_number']
 
         # MySQL 데이터베이스 연결 및 대조
-        try:
-            logger.info(f"Request method: {request.method}")
-            logger.info("Connecting to source database for user verification")
-            connection = pymysql.connect(**DB_CONFIG_SOURCE)
-            cursor = connection.cursor(pymysql.cursors.DictCursor)
+    try:
+        logger.info(f"Request method: {request.method}")
+        logger.info("Connecting to source database for user verification")
+        connection = pymysql.connect(**DB_CONFIG_SOURCE)
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
 
-            query = """
-                SELECT * 
-                FROM student_info 
-                WHERE email = %s 
-                AND student_id = %s
+        query = """
+            SELECT * 
+            FROM student_info 
+            WHERE email = %s 
+            AND student_id = %s
             """
-            cursor.execute(query, (email, student_id))
-            result = cursor.fetchone()
+        cursor.execute(query, (email, student_id))
+        result = cursor.fetchone()
 
-            if not result:
-                logger.warning(f"User information not found for email: {email} and student_id: {student_id}")
-                return jsonify({'error': 'User information does not match any record in student_info database'}), 400
-            logger.info("User information verified successfully")
-        except pymysql.MySQLError as e:
-            logger.error(f"Database error during user verification: {str(e)}")
-            return jsonify({'error': f'Database error: {str(e)}'}), 500
-        finally:
-            if 'cursor' in locals():
-                cursor.close()
-            if 'connection' in locals():
-                connection.close()
+        if not result:
+            logger.warning(f"User information not found for email: {email} and student_id: {student_id}")
+            return jsonify({'error': 'User information does not match any record in student_info database'}), 400
+        logger.info("User information verified successfully")
+    except pymysql.MySQLError as e:
+        logger.error(f"Database error during user verification: {str(e)}")
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'connection' in locals():
+            connection.close()
 
         # MySQL 대상 데이터베이스에 회원 정보 저장
-        try:
-            logger.info(f"Request method: {request.method}")
-            logger.info("Connecting to destination database for user registration")
-            connection = pymysql.connect(**DB_CONFIG_DEST)
-            cursor = connection.cursor()
+    try:
+        logger.info(f"Request method: {request.method}")
+        logger.info("Connecting to destination database for user registration")
+        connection = pymysql.connect(**DB_CONFIG_DEST)
+        cursor = connection.cursor()
             
-            if User.query.filter_by(student_id=student_id).first():
-                logger.warning(f"Attempt to register with existing student_id: {student_id}")
-                return jsonify({"success": False, "message": "이미 등록된 학번입니다."}), 400
+        if User.query.filter_by(student_id=student_id).first():
+            logger.warning(f"Attempt to register with existing student_id: {student_id}")
+            return jsonify({"success": False, "message": "이미 등록된 학번입니다."}), 400
 
-            if User.query.filter_by(email=email).first():
-                logger.warning(f"Attempt to register with existing email: {email}")
-                return jsonify({"success": False, "message": "이미 등록된 이메일입니다."}), 400
+        if User.query.filter_by(email=email).first():
+            logger.warning(f"Attempt to register with existing email: {email}")
+            return jsonify({"success": False, "message": "이미 등록된 이메일입니다."}), 400
 
             # 비밀번호 해싱
-            password_hash = hashpw(password.encode('utf-8'), gensalt()).decode('utf-8')
+        password_hash = hashpw(password.encode('utf-8'), gensalt()).decode('utf-8')
 
             # `users` 테이블에 데이터 삽입
-            insert_query = """
-                INSERT INTO users (student_id, email, department, name, phone_number, password_hash)
-                VALUES (%s, %s, %s, %s, %s, %s)
+        insert_query = """
+            INSERT INTO users (student_id, email, department, name, phone_number, password_hash)
+            VALUES (%s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(insert_query, (student_id, email, department, name, phone_number, password_hash))
-            connection.commit()
-            logger.info(f"User registered successfully: {email}")
-        except pymysql.MySQLError as e:
-            logger.error(f"Database error during user registration: {str(e)}")
-            return jsonify({'error': f'Failed to save user information: {str(e)}'}), 500
-        finally:
-            if 'cursor' in locals():
-                cursor.close()
-            if 'connection' in locals():
-                connection.close()
+        cursor.execute(insert_query, (student_id, email, department, name, phone_number, password_hash))
+        connection.commit()
+        logger.info(f"User registered successfully: {email}")
+    except pymysql.MySQLError as e:
+        logger.error(f"Database error during user registration: {str(e)}")
+        return jsonify({'error': f'Failed to save user information: {str(e)}'}), 500
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'connection' in locals():
+            connection.close()
 
         # 회원가입 성공 메시지 반환
         logger.info("Signup process completed successfully")
         return jsonify({'message': 'Sign up successful! Your information has been saved.'}), 200
-    
-    logger.info("GET request received for signup page")
-    return render_template('register.html')  # GET 요청 시 회원가입 페이지 렌더링
+
 
 @app.errorhandler(400)
 def bad_request(error):
