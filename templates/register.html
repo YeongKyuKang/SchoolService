@@ -185,8 +185,7 @@
             const registerForm = document.getElementById('registerForm');
             
             registerForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
+
                 const formData = new FormData(registerForm);
                 
                 fetch('/register', {
@@ -207,6 +206,7 @@
                 .catch(error => {
                     console.error('Error:', error);
                     alert('서버 오류가 발생했습니다. 나중에 다시 시도해주세요.');
+                    window.location.href = '/login';
                 });
             });
         });
@@ -217,7 +217,7 @@
                 window.location.href = '/login';
             } else {
                 alert(data.message);
-                
+                window.location.href = '/login';
             }
         }
     </script>
