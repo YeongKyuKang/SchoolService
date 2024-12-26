@@ -6,7 +6,7 @@ from config import Config
 from models import db
 from routes import notice as notice_blueprint
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/notice/news/static')
 app.config.from_object(Config)
 app.config['TESTING'] = os.environ.get('FLASK_TESTING', 'False') == 'True'
 
