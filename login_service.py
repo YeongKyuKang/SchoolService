@@ -80,10 +80,6 @@ def login():
 def home():
     return redirect(url_for('login'))
 
-@app.route('/registers')
-def registers():
-    return render_template('register.html')
-
 @app.route('/register', methods=['GET', 'POST'])
 def signup():
     logger.info(f"Request URL: {request.url}")
