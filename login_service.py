@@ -86,7 +86,6 @@ def registers():
 
 @app.route('/register', methods=['GET', 'POST'])
 def signup():
-    logger.info(f"Request URL: {request.url}")
     logger.info("Signup route accessed")
     logger.info(f"Request method: {request.method}")
     if request.method == 'POST':
