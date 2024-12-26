@@ -192,6 +192,9 @@
                     method: 'POST',
                     body: formData,
                     credentials: 'include'
+                    headers: {
+                        'Accept': 'application/json'
+                    }
                 })
                 .then(response => {
                     if (!response.ok) {
